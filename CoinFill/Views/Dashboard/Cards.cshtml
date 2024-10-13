@@ -1,0 +1,646 @@
+﻿@model CoinFill.ViewModels.CardsPageViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Cards");
+    ViewData.SetMetaDescription("Easily manage all your crypto cards on this page.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string cols = "col-12";
+    string cardHolder = "";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #address.hover-border-primary:hover,
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fal fa-credit-card",
+        "text-primary",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row">
+    @if (Model.Cards != null && Model.Cards.Any())
+    {
+        cols = "d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3";
+        foreach (var card in Model.Cards)
+        {
+            <div class="@cols text-center mb-3">
+                <div class="card card-span"
+                     style="background-image: url('/images/static/card-backgrounds/@card.BackgroundImage'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                    <div class="card-body">
+                        <div class="d-flex @card.BootstrapClasses">
+                            <img src="~/images/static/card-types-images/@card.Brand" width="@card.Width" height="@card.Height" alt="Crypto @card.Brand card" />
+                            <div class="justify-content-end ml-auto">
+                                @if (card.ActivationStatus == 1)
+                                {
+                                    <span class="badge badge-soft-success">
+                                        <i class="fas fa-check-circle mr-1"></i>Active
+                                    </span>
+                                }
+                                else if (card.ActivationStatus == 0)
+                                {
+                                    <span class="badge badge-soft-warning">
+                                        <i class="fas fa-stream mr-1"></i>Pending
+                                    </span>
+                                }
+                                else if (card.ActivationStatus == -1)
+                                {
+                                    <button data-card-id="@card.Id" class="btn btn-danger btn-mini p-2 btn-confirm-card" type="button">
+                                        <span>Confirm wallet</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            @if (card.ActivationStatus == 1)
+                            {
+                                <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                                    <span class="text-black fs-2 font-weight-semi-bold">$ @card.Balance</span>
+                                    <span class="d-flex align-items-center">
+                                        <button data-add-funds="@card.Id" class="btn btn-mini p-2 btn-success">
+                                            <span>&nbsp;$ Add funds&nbsp;</span>
+                                        </button>
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-12 text-black fs-2 font-weight-semi-bold text-left mt-3 mb-2">
+                                    $ @card.Balance
+                                </div>
+                            }
+                            <div class="col-12 text-black text-left font-weight-medium">
+                                @card.Number
+                            </div>
+                            <div class="col-12 text-black d-flex justify-content-between">
+                                <span data-toggle="tooltip"
+                                      data-placement="bottom"
+                                      data-html="true"
+                                      title="<i class='fas fa-user text-info mr-1'></i>@card.FirstName @card.LastName"
+                                      class="font-weight-semi-bold">
+                                    @if ((card.FirstName + " " + card.LastName).Length > 14)
+                                    {
+                                        cardHolder = (card.FirstName + " " + card.LastName).TakeMax(11) + "...";
+                                    }
+                                    else
+                                    {
+                                        cardHolder = card.FirstName + " " + card.LastName;
+                                    }
+                                    @cardHolder
+                                </span>
+                                <span class="font-weight-medium">@card.ExpirationDate</span>
+                                <span class="font-weight-medium">@card.Cvv</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div id="add-card-col" class="@cols text-center mb-3">
+        <button id="btn-add-new"
+                type="button"
+                data-toggle="modal"
+                data-target="#card-type-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem !important;">
+            <span class="d-flex flex-center">
+                <i class="fal fa-plus-circle fa-2x mr-2"></i>Create crypto card
+            </span>
+        </button>
+    </div>
+</div>
+
+<div id="card-type-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose your prefered card type</h5>
+                <button id="card-type-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body px-4 pb-5 pt-sm-1 px-sm-5">
+                <div class="row">
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="cf-icon-virtual-card fa-3x text-primary"></i>
+                            Virtual crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" alt="Visa" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" alt="Mastercard" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" alt="American Express" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" alt="UnionPay" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" alt="Discover" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" alt="JCB" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" alt="ELO" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $35000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">The card is available immediately after payment verification</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price: 49$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="virtual-card" data-card-type="virtual" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your virtual crypto card</span>
+                        </button>
+                    </div>
+                    <div class="col-md-2 d-none d-lg-flex justify-content-center">
+                        <div class="border-dotted-left-4 d-none d-sm-block"></div>
+                    </div>
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="fal fa-credit-card fa-2x text-primary mr-2"></i>
+                            Physical crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" alt="Visa" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" alt="Mastercard" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" alt="American Express" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" alt="UnionPay" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" alt="Discover" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" alt="JCB" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" alt="ELO" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $35000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Shipping to
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-countries-modal">@Model.SupportedCountriesCount supported countries</button>;
+                                                        arrives in 5-7 business days
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price + shipping: 149$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="physical-card" data-card-type="physical" data-address="@Html.Raw(Model.Address)" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your physical crypto card</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="card-brand-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose the brand of card you would like to create</h5>
+                <button id="card-brand-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <button data-card-brand="Visa" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/visa.png" width="50" height="30" alt="Visa" />
+                    </span>
+                </button>
+                <button data-card-brand="Mastercard" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/mastercard.png" width="50" height="30" alt="Mastercard" />
+                    </span>
+                </button>
+                <button data-card-brand="American Express" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/americanexpress.png" width="65" height="30" alt="American Express" />
+                    </span>
+                </button>
+                <button data-card-brand="UnionPay" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/unionpay.png" width="50" height="30" alt="UnionPay" />
+                    </span>
+                </button>
+                <button data-card-brand="Discover" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/discover-card.png" width="100" height="30" alt="Discover" />
+                    </span>
+                </button>
+                <button data-card-brand="JCB" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/jcb.png" width="40" height="30" alt="JCB" />
+                    </span>
+                </button>
+                <button data-card-brand="elo" class="btn btn-falcon-secondary btn-block mb-1">
+                    <span>
+                        <img src="~/images/static/card-types-images/elo-card.png" width="65" height="30" alt="elo" />
+                    </span>
+                </button>
+            </div>
+            <div class="modal-footer pt-3 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-cancel-card-brand" class="btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="payment-methods-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose your prefered payment method</h5>
+                <button id="payment-methods-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="create-card-form" autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label asp-for="Chosen_PaymentMethodId" class="mb-2"></label>
+                        <select asp-for="Chosen_PaymentMethodId"
+                                data-dropup-auto="false"
+                                class="selectpicker form-control"
+                                data-live-search="true"
+                                title="Payment method"
+                                data-size="4">
+                            @if (Model.ToChooseFrom_PaymentMethods != null && Model.ToChooseFrom_PaymentMethods.Any())
+                            {
+                                foreach (var paymentType in Model.ToChooseFrom_PaymentMethods)
+                                {
+                                    var concat = Helper.GetObjectIconAndNameAndColor(paymentType.Text);
+
+                                    <option value="@paymentType.Value" data-content="<div class='avatar avatar-m mr-2'><img class='rounded-circle border-0 d-inline-block' src='/images/static/cryptocurrencies/@concat[0]' alt='@concat[1]' /></div>@concat[1]">
+                                        @concat[1]
+                                    </option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>Payment methods unavailable.</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Chosen_PaymentMethodId" class="invalid-feedback"></span>
+                    </div>
+                </form>
+                <div id="network-dropdown-holder" class="form-group" style="display: none;">
+                    <label for="network">Select the blockchain</label>
+                    <select id="network"
+                            data-dropup-auto="false"
+                            class="selectpicker form-control"
+                            data-live-search="true"
+                            title="Blockchain"
+                            data-size="4"></select>
+                    <span id="network-validation" class="invalid-feedback"></span>
+                </div>
+                <div id="qr-address-holder" class="form-group flex-center no-gutters" style="display: none;">
+                    <div id="notice" class="col-12 text-center mb-2"></div>
+                    <div id="qr-address" class="avatar avatar-4xl"></div>
+                    <div class="input-group mt-2">
+                        <textarea id="address" readonly="" type="text" class="hover-border-primary col-12 text-center form-control" value="" onclick="copyToClipboard()"></textarea>
+                        <div class="input-group-append">
+                            <button id="copy" type="button" class="input-group-text btn" onclick="copyToClipboard()">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="alert-body" class="alert alert-success align-items-center mb-0" role="alert" style="display: none; color: var(--ca-green) !important;">
+                    <i class="fad fa-check-circle fa-lg mr-3"></i>
+                    <div id="alert-message" class="m-auto" style="display: none;">
+                        Soon, you will get a confirmation email with an update at @Model.Email.
+                        <br />
+                        <br />
+                        It takes 5-30 minutes to verify the transaction and create your <span id="card-type-holder"></span> crypto <span id="card-brand-holder"></span> card.
+                    </div>
+                </div>
+            </div>
+            <div id="payment-modal-footer" class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-finish-payment" class="btn btn-primary btn-block m-0 mb-3" style="display: none;">
+                    <span>Done</span>
+                </button>
+                <button id="btn-cancel-payment" class="btn btn-falcon-secondary btn-block m-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCryptocurrencies.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCountries.cshtml")
+
+@section Scripts {
+    <script src="~/js/add-card.js"></script>
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var addAddressUrl = '@Url.Action("EditAddress", "Account", new { Area = "" })';
+        var getNetworks = '@Url.Action("GetNetworks", "Dashboard", new { Area = "" })';
+        var getUserQrCode = '@Url.Action("GetUserQrCode", "Dashboard", new { Area = "" })';
+        var generateNetworkAddress = '@Url.Action("GenerateNetworkAddress", "Dashboard", new { Area = "" })';
+        var supportUrl = '@Url.Action("CustomerSupport", "Home", new { Area = "" })';
+        var getSenderAddressUrl = '@Url.Action("GetSenderAddressCapturePage", "Dashboard", new { Area = "" })';
+        var confirmPaymentPartialUrl = '@Url.Action("ConfirmPaymentPartial", "Dashboard", new { Area = "" })';
+        var setSenderAddressUrl = '@Url.Action("SetSenderAddress", "Dashboard", new { Area = "" })';
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+
+            var btnAddFunds = $('button[data-add-funds]');
+            var btnAddFundsText;
+            var btnAddFundsTextUnchanged;
+
+            btnAddFunds.click(function () {
+                const targetButton = $(this)
+                btnAddFundsText = $(this).find('span');
+                btnAddFundsTextUnchanged = btnAddFundsText.html();
+
+                btnAddFunds.prop('disabled', true);
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnAddFundsText.fadeOut('fast', function () {
+                    btnAddFundsText.html('<div class="spinner mx-auto position-absolute" style="right: 17%; bottom: 26%; width: 1rem !important; height: 1rem !important; border-top-color: var(--success) !important;"></div>').fadeIn('slow');
+                    targetButton.width(width);
+                    targetButton.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetTopUpCapturePage", "Dashboard", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            cardId: targetButton.attr('data-add-funds')
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    HandleCardDepositError(response.title, response.body, response.severity);
+                                }
+                            }
+                        },
+                        error: function () {
+                            HandleCardDepositError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                        }
+                    })
+                }, 1200)
+            })
+
+            function HandleCardDepositError(title, body, severity) {
+                btnAddFundsText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnAddFundsText.fadeOut('fast', function () {
+                                $(this).html(btnAddFundsTextUnchanged).fadeIn('slow');
+                                btnAddFunds.prop('disabled', false);
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    @if (!string.IsNullOrWhiteSpace(Model.CardIdToVerify))
+    {
+        if (ViewBag.AddNew == null || !((bool)ViewBag.AddNew))
+        {
+            if (Model.CardWalletAlreadySubmitted)
+            {
+                if (Model.StartTopTup)
+                {
+                    <script>
+                        $(document).ready(function () {
+                            setTimeout(function () {
+                                Swal.fire({
+                                    title: "@((string)ViewBag.CardVerificationHeaderMessage)",
+                                    text: "@ViewBag.CardVerificationBodyMessage",
+                                    icon: "@ViewBag.CardVerificationSeverity",
+                                    confirmButtonColor: "#00d27a",
+                                    confirmButtonText: "Top up card"
+                                }).then(() => {
+                                    $(`[data-add-funds="@Model.CardIdToVerify"]`).click();
+                                })
+                                window.history.pushState({}, '', '@Url.Action("Cards", "Dashboard", new { cardId = "" })');
+                            }, 1600)
+                        });
+                    </script>
+                }
+                else
+                {
+                    <script>
+                        $(document).ready(function () {
+                            setTimeout(function () {
+                                Swal.fire({
+                                    title: "@ViewBag.CardVerificationHeaderMessage",
+                                    text: "@ViewBag.CardVerificationBodyMessage",
+                                    icon: "@ViewBag.CardVerificationSeverity",
+                                    confirmButtonColor: "#27bcfd",
+                                    confirmButtonText: "Alright"
+                                })
+                                window.history.pushState({}, '', '@Url.Action("Cards", "Dashboard", new { cardId = "" })');
+                            }, 1600)
+                        });
+                    </script>
+                }
+            }
+            else
+            {
+                <script>
+                    $(document).ready(function () {
+                        setTimeout(function () {
+                            $(`[data-card-id="@Model.CardIdToVerify"]`).click();
+                            window.history.pushState({}, '', '@Url.Action("Cards", "Dashboard", new { cardId = "" })');
+                        }, 1600)
+                    });
+                </script>
+            }
+        }
+        else
+        {
+            <script>
+                $(document).ready(function () {
+                    setTimeout(function () {
+                        $('#card-type-modal').modal();
+                        window.history.pushState({}, '', '@Url.Action("Cards", "Dashboard", new { cardId = "" })');
+                    })
+                }, 1000);
+            </script>
+        }
+    }
+    <script src="~/js/clipboard2.js"></script>
+}

@@ -1,0 +1,79 @@
+﻿@{
+    bool isAuth = User.Identity.IsAuthenticated;
+    string cardsUrl = isAuth ? Url.Action("Cards", "Dashboard") : Url.Action("Cards", "Demo");
+    string banksUrl = isAuth ? Url.Action("BankAccounts", "Banks") : Url.Action("BankAccounts", "Demo");
+    string paypalUrl = isAuth ? Url.Action("TransferToPayPal", "PayPal") : Url.Action("TransferToPayPal", "Demo");
+}
+<div class="footer-top pt-3 mt-1">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-header border-bottom-0">
+                        <h3 class="fs-2 text-primary text-nowrap">
+                            <a asp-area="" asp-controller="Home" asp-action="Index" class="text-decoration-none" style="user-select: none;">C<i class="far align-middle fa-usd-circle text-primary" style="font-size: 0.71em !important;"></i>inFill</a>
+                        </h3>
+                    </div>
+                    <div class="card-body pt-0">
+                        <ul class="list-unstyled mb-0">
+                            <li><span class="text-muted"><i class="fal fa-sync fa-fw mr-2 no-tick"></i><span id="site-updated">Mar 3 2024</span></span></li>
+                            <li class="text-muted notranslate"><i class="fal fa-location- fa-fw mr-2 no-tick"></i>Bern 8406, Switzerland</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3 footer-links">
+                <div class="card h-100">
+                    <div class="card-header border-bottom-0">
+                        <h4 class="text-secondary">Useful Links</h4>
+                    </div>
+                    <div class="card-body pt-0">
+                        <ul>
+                            <li><i class="fal fa-address-card fa-fw text-primary mr-2 no-tick"></i><a asp-controller="Home" asp-action="AboutUs">About us</a></li>
+                            <li><i class="fal fa-address-book fa-fw text-primary mr-2 no-tick"></i><a asp-controller="Home" asp-action="ContactUs">Contact us</a></li>
+                            <li><i class="fal fa-scroll fa-fw text-primary mr-2 no-tick"></i><a asp-controller="Home" asp-action="Terms">Terms of use</a></li>
+                            <li><i class="fal fa-shield fa-fw text-primary mr-2 no-tick"></i><a asp-controller="Home" asp-action="Privacy">Privacy policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3 footer-links">
+                <div class="card h-100">
+                    <div class="card-header border-bottom-0">
+                        <h4 class="text-secondary">Our Services</h4>
+                    </div>
+                    <div class="card-body pt-0">
+                        <ul>
+                            <li><i class="fal fa-sack-dollar fa-fw text-success mr-2 no-tick"></i><a asp-area="" asp-controller="Staking" asp-action="HighApyStaking">High APY staking</a></li>
+                            <li><i class="fal fa-credit-card fa-fw text-primary mr-2 no-tick"></i><a href="@cardsUrl">Crypto cards</a></li>
+                            <li><i class="far fa-university fa-fw text-secondary mr-2 no-tick"></i><a href="@banksUrl">Crypto to bank</a></li>
+                            <li><i class="fab fa-paypal fa-fw text-primary mr-2 no-tick"></i><a href="@paypalUrl">Crypto to PayPal</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3 footer-links">
+                <div class="card h-100">
+                    <div class="card-header border-bottom-0 pb-0">
+                        <h4 class="text-secondary">Social Media</h4>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="icon-group d-flex align-items-center">
+                            <a onclick="toastr['info']('', 'Our Instagram account will be added soon')" class="instagram avatar avatar-l bg-transparent text-decoration-none" role="button">
+                                <img src="~/images/static/assets/instagram.svg" alt="instagram" />
+                            </a>
+                            <a href="https://www.tiktok.com/@@coinfill.io" rel="noreferrer nofollow" class="tiktok avatar avatar-xl mx-3 bg-transparent text-decoration-none" role="button">
+                                <img src="~/images/static/assets/tiktok.svg" alt="tiktok" />
+                            </a>
+                            <a onclick="toastr['info']('', 'Our X account will be added soon')" class="twitter avatar avatar-m bg-transparent text-decoration-none" role="button">
+                                <img src="~/images/static/assets/x-twitter.svg" alt="twitter" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br class="d-xxl-none" />
+<br class="d-xxl-none" />

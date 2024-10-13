@@ -1,0 +1,42 @@
+﻿@using CoinFill.Helpers.Extensions
+
+<link rel="stylesheet" href="~/css/bottom-menu.css" />
+
+<div class="mobile-bm">
+    <div class="navigation-bm">
+        <ul class="pl-0">
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="Profile">
+                    <span class="icon"><i class="fal fa-user text-black"></i></span>
+                </a>
+            </li>
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="Dashboard">
+                    <span class="icon"><i class="fal fa-chart-bar text-black"></i></span>
+                </a>
+            </li>
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="Cards">
+                    <span class="icon"><i class="fal fa-credit-card text-black"></i></span>
+                </a>
+            </li>
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="BankAccounts">
+                    <span class="icon"><i class="fal fa-university text-black"></i></span>
+                </a>
+            </li>
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="Staking">
+                    <span class="icon"><i class="fal fa-sack-dollar text-black"></i></span>
+                </a>
+            </li>
+            <li class="list">
+                <a asp-area="" asp-controller="Demo" asp-action="TransferToPayPal">
+                    <span class="icon"><i class="fab fa-paypal text-black"></i></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(@<script async src="~/js/bottom-menu.js"></script>)

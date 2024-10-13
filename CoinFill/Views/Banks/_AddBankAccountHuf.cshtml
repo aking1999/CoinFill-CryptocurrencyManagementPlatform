@@ -1,0 +1,359 @@
+﻿@model CoinFill.ViewModels.BankAccountTypes.AddBankAccountHuf
+@using CoinFill.Helpers.Extensions
+
+<div id="huf-bank-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Enter your bank information</h5>
+                <button id="huf-bank-times" type="button" class="btn-close-huf-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="huf-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <i class="fas fa-university text-secondary fa-3x mr-n2"></i>
+                            <img src="~/images/static/bank-currencies/HUF.svg" width="24" height="24" alt="HUF" class="ml-n3 rounded-circle" />
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="HufAccountHolderFirstName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="HufAccountHolderFirstName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HufAccountHolderFirstName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="HufAccountHolderLastName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="HufAccountHolderLastName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HufAccountHolderLastName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">
+                                    HUF Bank Account Information
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="HufBicSwift"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="HufBicSwift" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HufBicSwift" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="HufIBAN"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="HufIBAN" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HufIBAN" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-save-huf-bank" class="btn btn-primary btn-block m-0 mb-3">
+                    <span>Save bank account</span>
+                </button>
+                <button id="btn-cancel-huf-bank" class="btn-close-huf-modal btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            let hufFirstName = $('#HufAccountHolderFirstName');
+            let hufLastName = $('#HufAccountHolderLastName');
+            let hufBicSwift = $('#HufBicSwift');
+            let hufIban = $('#HufIBAN');
+
+            let btnSaveHuf = $('#btn-save-huf-bank');
+            let btnSaveHufText = btnSaveHuf.find('span');
+            let btnSaveHufTextUnchanged = btnSaveHufText.html();
+
+            const hufTimes = $('#huf-bank-times');
+            const hufCancel = $('#btn-cancel-huf-bank');
+
+            const hufForm = $('#huf-form');
+            const hufBankModal = $('#huf-bank-modal');
+
+            btnSaveHuf.click(function () {
+                DisableHufInputs();
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnSaveHufText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSaveHuf.width(width);
+                    btnSaveHuf.height(height);
+                });
+
+                setTimeout(function () {
+                    if (HufFormIsValid()) {
+                        let formData = new FormData(hufForm.get(0));
+                        formData.append('hufAccount.HufAccountHolderFirstName', hufFirstName.val());
+                        formData.append('hufAccount.HufAccountHolderLastName', hufLastName.val());
+                        formData.append('hufAccount.HufAccountCurrency', 'HUF');
+                        formData.append('hufAccount.HufBicSwift', hufBicSwift.val());
+                        formData.append('hufAccount.HufIBAN', hufIban.val());
+
+                        $.ajax({
+                            url: '@Url.Action("AddHufBankAccount", "Banks", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveHufText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                hufBankModal.modal('hide');
+                                                EnableHufInputs();
+                                                btnSaveHufText.html(btnSaveHufTextUnchanged);
+
+                                                let requiredHufBankInfo = '<div class="text-left">' +
+                                                    `BIC/SWIFT: ${response.bank.bicSwift}` +
+                                                    '</div>' +
+                                                    '<div class="text-left">' +
+                                                    `IBAN: ${response.bank.bankAccountNumber}` +
+                                                    '</div>' +
+                                                    `<button data-send-to-bank="${response.bank.id}" class="btn btn-soft-info btn-block mt-auto">` +
+                                                    '<span>&nbsp;Deposit cryptocurrencies&nbsp;</span>' +
+                                                    '</button>';
+
+                                                let newHufBankBody = '<div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">' +
+                                                    '<div class="card card-span" style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">' +
+                                                    '<div class="card-body d-flex flex-column">' +
+                                                    '<div class="card-img-top mb-3 d-flex justify-content-start">' +
+                                                    '<div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">' +
+                                                    '<i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>' +
+                                                    `<img src="/images/static/bank-currencies/${response.bank.currency}.svg" width="24" height="24" alt="${response.bank.currency}" class="rounded-circle ml-n4 mt-4" />` +
+                                                    '</div>' +
+                                                    '<span class="ml-3 text-left">' +
+                                                    '<span class="font-weight-semi-bold text-black">' +
+                                                    `${response.bank.currency} Bank Account` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Bank ID: ${response.bank.id}` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Deposit fee: ${response.bank.fee}%` +
+                                                    '</span>' +
+                                                    '</span>' +
+                                                    '<div class="ml-auto">' +
+                                                    '<span class="badge badge-soft-success">' +
+                                                    '<i class="fas fa-check-circle mr-1"></i>Active' +
+                                                    '</span>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '<div class="text-left text-black">' +
+                                                    `${response.bank.firstName} ${response.bank.lastName}` +
+                                                    '</div>' +
+                                                    requiredHufBankInfo +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+
+                                                const addBankCol = $('#add-bank-col');
+                                                addBankCol.removeClass();
+                                                addBankCol.addClass('d-flex justify-content-center col-12 col-md-6 col-xl-4 mb-3');
+
+                                                $(newHufBankBody).insertBefore('#add-bank-col');
+
+                                                $(`button[data-send-to-bank="${response.bank.id}"]`).click(function () {
+                                                    FuncConfirmBankDeposit($(this));
+                                                })
+
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleHufBankError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleHufBankError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            }
+                        })
+                    } else HandleHufBankError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function FuncConfirmBankDeposit(bankElement) {
+                let node = $(bankElement);
+                let bankElementText = node.find('span');
+                let bankElementTextUnchanged = bankElementText.html();
+                const bankId = node.attr('data-send-to-bank');
+
+                $('button[data-send-to-bank]').prop('disabled', true);
+
+                const width = node.width();
+                const height = node.height();
+                bankElementText.fadeOut('fast', function () {
+                    bankElementText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: white;"></div>').fadeIn('slow');
+                    node.width(width);
+                    node.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetBankWithdrawCapturePage", "Banks", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            bankId: bankId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    bankElementText.fadeOut('fast', function () {
+                                        bankElementText.html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[response.severity](response.body, response.title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                bankElementText.fadeOut('fast', function () {
+                                                    $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                                    $('button[data-send-to-bank]').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            bankElementText.fadeOut('fast', function () {
+                                $(this).html('<i class="fas fa-times text-white no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        bankElementText.fadeOut('fast', function () {
+                                            $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                            $('button[data-send-to-bank]').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            }
+
+            $('.btn-close-huf-modal').click(function () {
+                hufBankModal.modal('hide');
+                $('#new-bank-currency-modal').modal('show');
+            })
+
+            function HufElementIsValid(element) {
+                return hufForm.validate().element($(element));
+            }
+
+            function HufFormIsValid() {
+                const firstNameValid = HufElementIsValid(hufFirstName);
+                const lastNameValid = HufElementIsValid(hufLastName);
+                const bicSwiftValid = HufElementIsValid(hufBicSwift);
+                const ibanValid = HufElementIsValid(hufIban);
+
+                return (firstNameValid && lastNameValid &&
+                    bicSwiftValid && ibanValid);
+            };
+
+            function EnableHufInputs() {
+                hufFirstName.prop('readonly', false);
+                hufLastName.prop('readonly', false);
+                hufBicSwift.prop('readonly', false);
+                hufIban.prop('readonly', false);
+
+                btnSaveHuf.prop('disabled', false);
+                hufTimes.prop('disabled', false);
+                hufCancel.prop('disabled', false);
+            }
+
+            function DisableHufInputs() {
+                hufFirstName.prop('readonly', true);
+                hufLastName.prop('readonly', true);
+                hufBicSwift.prop('readonly', true);
+                hufIban.prop('readonly', true);
+
+                btnSaveHuf.prop('disabled', true);
+                hufTimes.prop('disabled', true);
+                hufCancel.prop('disabled', true);
+            }
+
+            function HandleHufBankError(title, body, severity) {
+                btnSaveHufText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveHufText.fadeOut('fast', function () {
+                                $(this).html(btnSaveHufTextUnchanged).fadeIn('slow');
+                                EnableHufInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>)

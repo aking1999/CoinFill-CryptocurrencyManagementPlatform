@@ -1,0 +1,466 @@
+﻿@model CoinFill.ViewModels.BankAccountsPageViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Bank accounts");
+    ViewData.SetMetaDescription("Easily send cryptocurrencies to your bank accounts and convert them to real money on this page.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string cols = "col-12";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+
+        .img-currency {
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+        }
+    </style>
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fas fa-university",
+        "text-secondary",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row">
+    @Html.AntiForgeryToken()
+    @if (Model.BankAccounts != null && Model.BankAccounts.Any())
+    {
+        cols = "d-flex justify-content-center col-12 col-md-6 col-xl-4";
+        foreach (var bank in Model.BankAccounts)
+        {
+            <div class="@cols text-center mb-3">
+                <div class="card card-span"
+                     style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+                    <div class="card-body d-flex flex-column">
+                        <div class="card-img-top mb-3 d-flex justify-content-start">
+                            <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                                <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                                <span style="background-image: url('/images/static/bank-currencies/@(bank.Currency).svg');" class="img-currency ml-n4 mt-4"></span>
+                            </div>
+                            <span class="ml-3 text-left">
+                                <span class="font-weight-semi-bold text-black">
+                                    @bank.Currency @bank.AccountType
+                                </span>
+                                <br />
+                                <span class="fs--1">
+                                    @bank.IdLabel ID: @bank.Id
+                                </span>
+                                <br />
+                                <span class="fs--1">
+                                    Deposit fee: @bank.Fee%
+                                </span>
+                            </span>
+                            <div class="ml-auto">
+                                <span class="badge badge-soft-success">
+                                    <i class="fas fa-check-circle mr-1"></i>Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-left text-black">
+                            @bank.FirstName @bank.LastName
+                        </div>
+                        @if (bank.Currency == "EUR" || bank.Currency == "GBP" || bank.Currency == "HUF" ||
+                        bank.Currency == "NOK" || bank.Currency == "DKK" || bank.Currency == "SEK" ||
+                        bank.Currency == "RSD" || bank.Currency == "CHF" || bank.Currency == "PLN" ||
+                        bank.Currency == "CZK" || bank.Currency == "BGN" || bank.Currency == "ILS" ||
+                        bank.Currency == "BAM" || bank.Currency == "TRY" || bank.Currency == "AED" ||
+                        bank.Currency == "RON")
+                        {
+                            <div class="text-left">
+                                BIC/SWIFT: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                IBAN: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "USD")
+                        {
+                            <div class="text-left">
+                                Routing: @bank.RoutingNumber
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "CNY")
+                        {
+                            <div class="text-left">
+                                UnionPay Card Number:
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "HKD")
+                        {
+                            <div class="text-left">
+                                Bank/Clearing Code: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "IRR")
+                        {
+                            <div class="text-left">
+                                Card Number:
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "KRW")
+                        {
+                            <div class="text-left">
+                                Bank Name/Code: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "CAD")
+                        {
+                            <div class="text-left">
+                                Transit: @bank.TransitNumber
+                            </div>
+                            <div class="text-left">
+                                Institution: @bank.InstitutionNumber
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "AUD")
+                        {
+                            <div class="text-left">
+                                BSB/BIC/SWIFT: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "INR")
+                        {
+                            <div class="text-left">
+                                IFSC: @bank.Ifsc
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "MXN")
+                        {
+                            <div class="text-left">
+                                CLABE (Clave Bancaria Estandarizada):
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "PKR" || bank.Currency == "RUB" || bank.Currency == "UAH")
+                        {
+                            <div class="text-left">
+                                BIC: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                IBAN: @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                        else if (bank.Currency == "MAD")
+                        {
+                            <div class="text-left">
+                                RIB (relevé d’identité bancaire):
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                            <button data-send-to-bank="@bank.Id" class="btn btn-soft-info btn-block mt-auto">
+                                <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div id="add-bank-col" class="@cols text-center mb-3">
+        <button type="button"
+                data-toggle="modal"
+                data-target="#new-bank-currency-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="media flex-center">
+                <div>
+                    <div>
+                        <div class="avatar avatar-2xl">
+                            <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block" src="/images/static/cryptocurrencies/btc.png" alt="Bank" loading="lazy" style="min-width: 2.5rem !important;">
+                        </div>
+                        <i class="far fa-long-arrow-right align-middle text-secondary"></i>
+                        <i class="fas fa-university fa-lg align-middle text-secondary mr-2" style="margin-left: 0.4rem !important;"></i>
+                    </div>
+                    Add bank account
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+<div id="new-bank-currency-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header flex-center border-bottom-0 pb-0">
+                <div>
+                    <h5 class="modal-title text-center mx-auto">Choose the currency of your bank account</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-nowrap">
+                                    <a asp-area="" asp-controller="PayPal" asp-action="TransferToPayPal" class="text-500">
+                                        or send to <img src="~/images/static/bank-currencies/paypal.svg" height="24" alt="PayPal" class="mx-1" /> instead
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                @await Component.InvokeAsync("SupportedCurrencies")
+            </div>
+            <div class="modal-footer pt-3 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-cancel-bank-currency" class="btn btn-falcon-secondary btn-block m-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountEur.cshtml", Model.EurAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountUsd.cshtml", Model.UsdAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountGbp.cshtml", Model.GbpAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountChf.cshtml", Model.ChfAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountCny.cshtml", Model.CnyAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountHkd.cshtml", Model.HkdAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountRub.cshtml", Model.RubAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountIrr.cshtml", Model.IrrAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountKrw.cshtml", Model.KrwAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountCad.cshtml", Model.CadAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountAud.cshtml", Model.AudAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountNok.cshtml", Model.NokAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountDkk.cshtml", Model.DkkAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountSek.cshtml", Model.SekAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountInr.cshtml", Model.InrAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountHuf.cshtml", Model.HufAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountRsd.cshtml", Model.RsdAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountBam.cshtml", Model.BamAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountPln.cshtml", Model.PlnAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountUah.cshtml", Model.UahAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountCzk.cshtml", Model.CzkAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountRon.cshtml", Model.RonAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountBgn.cshtml", Model.BgnAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountTry.cshtml", Model.TryAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountAed.cshtml", Model.AedAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountMxn.cshtml", Model.MxnAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountIls.cshtml", Model.IlsAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountPkr.cshtml", Model.PkrAccount)
+@await Html.PartialAsync("~/Views/Banks/_AddBankAccountMad.cshtml", Model.MadAccount)
+
+@section Scripts {
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+
+            var btnAddFunds = $('button[data-send-to-bank]');
+            var btnAddFundsText;
+            var btnAddFundsTextUnchanged;
+
+            let bankCurrencyModal = $('#new-bank-currency-modal');
+            let btnBankInfo = $('button[data-bank-currency]');
+
+            btnBankInfo.click(function () {
+                const currency = $(this).attr('data-bank-currency').toLowerCase();
+
+                bankCurrencyModal.modal('hide');
+                $(`#${currency}-bank-modal`).modal();
+            })
+
+            btnAddFunds.click(function () {
+                const targetButton = $(this)
+                btnAddFundsText = $(this).find('span');
+                btnAddFundsTextUnchanged = btnAddFundsText.html();
+
+                btnAddFunds.prop('disabled', true);
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnAddFundsText.fadeOut('fast', function () {
+                    btnAddFundsText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: white;"></div>').fadeIn('slow');
+                    targetButton.width(width);
+                    targetButton.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetBankWithdrawCapturePage", "Banks", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            bankId: targetButton.attr('data-send-to-bank')
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    HandleBankDepositError(response.title, response.body, response.severity);
+                                }
+                            }
+                        },
+                        error: function () {
+                            HandleBankDepositError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                        }
+                    })
+                }, 1200)
+            })
+
+            $('#btn-cancel-bank-currency').click(function () {
+                bankCurrencyModal.modal('hide');
+            })
+
+            function HandleBankDepositError(title, body, severity) {
+                btnAddFundsText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnAddFundsText.fadeOut('fast', function () {
+                                $(this).html(btnAddFundsTextUnchanged).fadeIn('slow');
+                                btnAddFunds.prop('disabled', false);
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>
+    <script async src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    @if (!string.IsNullOrWhiteSpace(Model.BankIdToDeposit))
+    {
+        if (ViewBag.AddNew == null || !((bool)ViewBag.AddNew))
+        {
+            if (Model.StartDeposit)
+            {
+                <script>
+                $(document).ready(function () {
+                    setTimeout(function () {
+                        $('[data-send-to-bank="@Model.BankIdToDeposit"]').click();
+                        window.history.pushState({}, '', '@Url.Action("BankAccounts", "Banks", new { bankId = "" })')
+                    }, 1600);
+                })
+                </script>
+            }
+            else
+            {
+                <script>
+                    $(document).ready(function () {
+                        setTimeout(function () {
+                            Swal.fire({
+                                title: "@ViewBag.BankDepositHeaderMessage",
+                                text: "@ViewBag.BankDepositBodyMessage",
+                                icon: "@ViewBag.BankDepositSeverity",
+                                confirmButtonColor: "#27bcfd",
+                                confirmButtonText: "Alright"
+                            });
+                            window.history.pushState({}, '', '@Url.Action("BankAccounts", "Banks", new { bankId = "" })')
+                        }, 1600);
+                    });
+                </script>
+            }
+        }
+        else
+        {
+            <script>
+                $(document).ready(function () {
+                    setTimeout(function () {
+                        $('#new-bank-currency-modal').modal();
+                        window.history.pushState({}, '', '@Url.Action("BankAccounts", "Banks", new { bankId = "" })')
+                    }, 1000)
+                })
+            </script>
+        }
+    }
+}

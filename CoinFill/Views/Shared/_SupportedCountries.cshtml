@@ -1,0 +1,21 @@
+﻿<div id="supported-countries-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Supported countries</h5>
+                <button type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pb-0" style="user-select: none;">
+                @await Component.InvokeAsync("SupportedCountries") 
+            </div>
+        </div>
+    </div>
+</div>

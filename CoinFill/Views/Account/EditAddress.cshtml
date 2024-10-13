@@ -1,0 +1,307 @@
+﻿@model CoinFill.ViewModels.EditAddressViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Address information");
+    ViewData.SetMetaDescription("Easily edit your address information on this page.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fal fa-location-circle",
+        "text-primary",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 mb-xs-3 mb-sm-3 mb-md-3 mb-lg-0">
+        <div class="card">
+            <div class="card-body p-4">
+                <form id="address-form" autocomplete="off">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="FullName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user fa-fw"></i></span>
+                                    </div>
+                                    <input asp-for="FullName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="FullName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-7">
+                            <div class="form-group">
+                                <label asp-for="Street"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-road fa-fw"></i></span>
+                                    </div>
+                                    <input asp-for="Street" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Street" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-group">
+                                <label asp-for="HouseNumber"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-home fa-fw"></i></span>
+                                    </div>
+                                    <input asp-for="HouseNumber" class="form-control" />
+                                </div>
+                                <span asp-validation-for="HouseNumber" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-7">
+                            <div class="form-group">
+                                <label asp-for="City"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-city fa-fw"></i></span>
+                                    </div>
+                                    <input asp-for="City" class="form-control" />
+                                </div>
+                                <span asp-validation-for="City" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-group">
+                                <label asp-for="PostalCode"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-mailbox fa-fw"></i></span>
+                                    </div>
+                                    <input asp-for="PostalCode" class="form-control" />
+                                </div>
+                                <span asp-validation-for="PostalCode" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="Chosen_CountryId" class="mb-2"></label>
+                                <select asp-for="Chosen_CountryId"
+                                        data-dropup-auto="false"
+                                        class="selectpicker form-control"
+                                        data-live-search="true"
+                                        title="Country"
+                                        data-size="4">
+                                    @if (Model.ToChooseFrom_Countries != null && Model.ToChooseFrom_Countries.Any())
+                                    {
+                                        foreach (var country in Model.ToChooseFrom_Countries)
+                                        {
+                                            var concat = Helper.GetObjectIconAndNameAndColor(country.Text);
+
+                                            <option value="@country.Value" data-content="<div class='avatar avatar-m mr-2'><img class='rounded-circle border-0 d-inline-block' src='/images/static/countries/@(concat[0]).svg' alt='@concat[1]' /></div>@concat[1]">
+                                                @concat[1]
+                                            </option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="" disabled>Countries unavailable.</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Chosen_CountryId" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button id="btn-save" type="button" class="btn btn-primary btn-block">
+                                <span>&nbsp;Save&nbsp;</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            let fullName = $('#FullName');
+            let street = $('#Street');
+            let houseNumber = $('#HouseNumber');
+            let city = $('#City');
+            let postalCode = $('#PostalCode');
+            let countries = $('#Chosen_CountryId');
+
+            let btnSave = $('#btn-save');
+            let btnSaveText = btnSave.find('span');
+            const btnSaveTextUnchanged = btnSaveText.html();
+
+            let addressForm = $('#address-form');
+
+            function CountriesDropdownHighlighter() {
+                let countriesParent = countries.closest('div');
+
+                if (countries.hasClass('is-valid')) {
+                    countriesParent.removeClass('is-invalid');
+                    countriesParent.addClass('is-valid');
+                } else if (countries.hasClass('is-invalid')) {
+                    countriesParent.removeClass('is-valid');
+                    countriesParent.addClass('is-invalid');
+                }
+            }
+
+            countries.change(function () {
+                let atLeastOneSelected = false;
+                $('#Chosen_CountryId > option').each(function () {
+                    if ($(this).is(':selected'))
+                        atLeastOneSelected = true;
+                });
+
+                if (atLeastOneSelected) {
+                    countries.closest('div').removeClass('is-invalid');
+                    countries.closest('div').addClass('is-valid');
+                } else {
+                    countries.closest('div').removeClass('is-valid');
+                    countries.closest('div').addClass('is-invalid');
+                }
+            });
+
+            btnSave.click(function () {
+                DisableInputs();
+
+                const height = $(this).height();
+                btnSaveText.fadeOut('fast', function () {
+                    btnSaveText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSave.height(height);
+                });
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        let formData = new FormData(addressForm.get(0));
+                        formData.append('addressVm.FullName', fullName.val());
+                        formData.append('addressVm.Street', street.val());
+                        formData.append('addressVm.HouseNumber', houseNumber.val());
+                        formData.append('addressVm.City', city.val());
+                        formData.append('addressVm.PostalCode', postalCode.val());
+                        formData.append('addressVm.Chosen_CountryId', countries.val());
+
+                        $.ajax({
+                            url: '@Url.Action("EditAddress", "Account", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+
+                                                EnableInputs();
+
+                                                Swal.mixin({
+                                                    customClass: {
+                                                        confirmButton: "btn btn-sm btn-success mr-2",
+                                                        cancelButton: "btn btn-sm btn-falcon-secondary"
+                                                    },
+                                                    buttonsStyling: false
+                                                }).fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    showCancelButton: true,
+                                                    confirmButtonText: "See Crypto cards",
+                                                    cancelButtonText: "Later"
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location.href = response.orderCryptoCardUrl;
+                                                    } else {
+                                                        window.location.href = '@Url.Action("Profile", "Account", new { Area = "" })';
+                                                    }
+                                                });
+                                            }, 600);
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else {
+                                        HandleError(response.title, response.body, response.severity);
+                                    }
+                                }
+                            },
+                            error: function () {
+                                HandleError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error')
+                            }
+                        })
+                    } else HandleError('Fill all the required fields', '', 'info');
+
+                }, 1200)
+            })
+
+            function ElementIsValid(element) {
+                return addressForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                let fullNameValid = ElementIsValid(fullName);
+                let streetValid = ElementIsValid(street);
+                let houseNumberValid = ElementIsValid(houseNumber);
+                let cityValid = ElementIsValid(city);
+                let postalCodeValid = ElementIsValid(postalCode);
+                let countryValid = ElementIsValid(countries);
+
+                CountriesDropdownHighlighter();
+
+                return (fullNameValid && streetValid &&
+                    houseNumberValid && cityValid &&
+                    postalCodeValid && countryValid);
+            }
+
+            function EnableInputs() {
+                btnSave.prop('disabled', false);
+
+                fullName.prop('readonly', false);
+                street.prop('readonly', false);
+                houseNumber.prop('readonly', false);
+                city.prop('readonly', false);
+                postalCode.prop('readonly', false);
+            }
+
+            function DisableInputs() {
+                btnSave.prop('disabled', true);
+
+                fullName.prop('readonly', true);
+                street.prop('readonly', true);
+                houseNumber.prop('readonly', true);
+                city.prop('readonly', true);
+                postalCode.prop('readonly', true);
+            }
+
+            function HandleError(title, body, severity) {
+                btnSaveText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title);
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveText.fadeOut('fast', function () {
+                                $(this).html(btnSaveTextUnchanged).fadeIn('slow');
+                                EnableInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

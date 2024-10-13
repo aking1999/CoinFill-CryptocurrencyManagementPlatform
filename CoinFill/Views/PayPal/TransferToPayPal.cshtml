@@ -1,0 +1,195 @@
+﻿@model CoinFill.ViewModels.PayPalViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("PayPal transfers");
+    ViewData.SetMetaDescription("Send cryptocurrency to a PayPal account, settling in USD upon arrival.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fab fa-paypal",
+        "text-primary",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+        <div class="card">
+            <div class="card-body p-4">
+                <form id="paypal-form" autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="avatar text-center p-2">
+                        <img class="p-0 border-0 d-inline-block" src="/images/static/bank-currencies/paypal.svg" alt="PayPal" loading="lazy">
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PayPalRecipientEmail"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                            </div>
+                            <input asp-for="PayPalRecipientEmail" class="form-control" />
+                        </div>
+                        <span asp-validation-for="PayPalRecipientEmail" class="invalid-feedback"></span>
+                    </div>
+                    <div class="btn-group-toggle d-flex" data-toggle="buttons">
+                        <label id="goods-and-services" class="btn btn-sm btn-soft-info w-100 mr-1">
+                            <input type="radio" name="options" id="option1"> Goods &amp; Services
+                        </label>
+                        <label id="friends-and-family" class="btn btn-sm btn-soft-info w-100 ml-1">
+                            <input type="radio" name="options" id="option2"> Friends &amp; Family
+                        </label>
+                    </div>
+                    <span id="transfer-type-feedback" class="invalid-feedback"></span>
+                    <button id="btn-transfer" type="button" class="btn btn-primary btn-block mt-3">
+                        <span>&nbsp;Request PayPal transfer&nbsp;</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let paypalEmail = $('#PayPalRecipientEmail');
+            const goodsAndServices = $('#goods-and-services');
+            const friendsAndFamily = $('#friends-and-family');
+
+            let paypalTransferType = '';
+            let paypalTransferTypeFeedback = $('#transfer-type-feedback');
+            const paypalTransferTypeFeedbackMessage = 'Choose the transfer type.';
+
+            let btnTransfer = $('#btn-transfer');
+            let btnTransferText = btnTransfer.find('span');
+            const btnTransferTextUnchanged = btnTransferText.html();
+
+            let paypalForm = $('#paypal-form');
+
+            goodsAndServices.click(function () {
+                paypalTransferTypeFeedback.html('');
+                paypalTransferType = 'Goods and Services';
+            })
+
+            friendsAndFamily.click(function () {
+                paypalTransferTypeFeedback.html('');
+                paypalTransferType = 'Friends and Family';
+            })
+
+            btnTransfer.click(function () {
+                DisableInputs();
+
+                const height = $(this).height();
+                btnTransferText.fadeOut('fast', function () {
+                    btnTransferText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnTransfer.height(height);
+                });
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        let formData = new FormData(paypalForm.get(0));
+                        formData.append('paypalVm.PayPalTransferType', paypalTransferType);
+                        formData.append('paypalVm.PayPalRecipientEmail', paypalEmail.val());
+
+                        $.ajax({
+                            url: '@Url.Action("GetPayPalWithdrawCapturePage", "PayPal", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    $('html').append(response.partialView);
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else {
+                                        HandleError(response.title, response.body, response.severity);
+                                    }
+                                }
+                            },
+                            error: function () {
+                                alert('error')
+                                HandleError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error')
+                            }
+                        })
+                    } else HandleError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function ElementIsValid(element) {
+                return paypalForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                let payPalTranferTypeValid = true;
+                if (paypalTransferType === '') {
+                    payPalTranferTypeValid = false;
+                    paypalTransferTypeFeedback.html(paypalTransferTypeFeedbackMessage);
+                }
+
+                const paypalEmailValid = ElementIsValid(paypalEmail);
+
+                return (payPalTranferTypeValid && paypalEmailValid);
+            }
+
+            function EnableInputs() {
+                paypalEmail.prop('readonly', false);
+                btnTransfer.prop('disabled', false);
+            }
+
+            function DisableInputs() {
+                paypalEmail.prop('readonly', true);
+                btnTransfer.prop('disabled', true);
+            }
+
+            function HandleError(title, body, severity) {
+                btnTransferText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title);
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnTransferText.fadeOut('fast', function () {
+                                $(this).html(btnTransferTextUnchanged).fadeIn('slow');
+                                EnableInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

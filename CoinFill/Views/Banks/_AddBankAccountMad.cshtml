@@ -1,0 +1,338 @@
+﻿@model CoinFill.ViewModels.BankAccountTypes.AddBankAccountMad
+@using CoinFill.Helpers.Extensions
+
+<div id="mad-bank-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Enter your bank information</h5>
+                <button id="mad-bank-times" type="button" class="btn-close-mad-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="mad-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <i class="fas fa-university text-secondary fa-3x mr-n2"></i>
+                            <img src="~/images/static/bank-currencies/MAD.svg" width="24" height="24" alt="MAD" class="ml-n3 rounded-circle" />
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="MadAccountHolderFirstName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="MadAccountHolderFirstName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="MadAccountHolderFirstName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="MadAccountHolderLastName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="MadAccountHolderLastName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="MadAccountHolderLastName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">
+                                    MAD Bank Account Information
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="MadRib"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="MadRib" class="form-control" />
+                                </div>
+                                <span asp-validation-for="MadRib" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-save-mad-bank" class="btn btn-primary btn-block m-0 mb-3">
+                    <span>Save bank account</span>
+                </button>
+                <button id="btn-cancel-mad-bank" class="btn-close-mad-modal btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            let madFirstName = $('#MadAccountHolderFirstName');
+            let madLastName = $('#MadAccountHolderLastName');
+            let madRib = $('#MadRib');
+
+            let btnSaveMad = $('#btn-save-mad-bank');
+            let btnSaveMadText = btnSaveMad.find('span');
+            let btnSaveMadTextUnchanged = btnSaveMadText.html();
+
+            const madTimes = $('#mad-bank-times');
+            const madCancel = $('#btn-cancel-mad-bank');
+
+            const madForm = $('#mad-form');
+            const madBankModal = $('#mad-bank-modal');
+
+            btnSaveMad.click(function () {
+                DisableMadInputs();
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnSaveMadText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSaveMad.width(width);
+                    btnSaveMad.height(height);
+                });
+
+                setTimeout(function () {
+                    if (MadFormIsValid()) {
+                        let formData = new FormData(madForm.get(0));
+                        formData.append('madAccount.MadAccountHolderFirstName', madFirstName.val());
+                        formData.append('madAccount.MadAccountHolderLastName', madLastName.val());
+                        formData.append('madAccount.MadAccountCurrency', 'MAD');
+                        formData.append('madAccount.MadRIB', madRib.val());
+
+                        $.ajax({
+                            url: '@Url.Action("AddMadBankAccount", "Banks", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveMadText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                madBankModal.modal('hide');
+                                                EnableMadInputs();
+                                                btnSaveMadText.html(btnSaveMadTextUnchanged);
+
+                                                let requiredMadBankInfo = '<div class="text-left">' +
+                                                    `RIB (relevé d’identité bancaire):<br> ${response.bank.rib}` +
+                                                    '</div>' +
+                                                    `<button data-send-to-bank="${response.bank.id}" class="btn btn-soft-info btn-block mt-auto">` +
+                                                    '<span>&nbsp;Deposit cryptocurrencies&nbsp;</span>' +
+                                                    '</button>';
+
+                                                let newMadBankBody = '<div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">' +
+                                                    '<div class="card card-span" style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">' +
+                                                    '<div class="card-body d-flex flex-column">' +
+                                                    '<div class="card-img-top mb-3 d-flex justify-content-start">' +
+                                                    '<div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">' +
+                                                    '<i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>' +
+                                                    `<span style="background-image: url('/images/static/bank-currencies/${response.bank.currency}.svg')" class="img-currency ml-n4 mt-4"></span>` +
+                                                    '</div>' +
+                                                    '<span class="ml-3 text-left">' +
+                                                    '<span class="font-weight-semi-bold text-black">' +
+                                                    `${response.bank.currency} Bank Account` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Bank ID: ${response.bank.id}` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Deposit fee: ${response.bank.fee}%` +
+                                                    '</span>' +
+                                                    '</span>' +
+                                                    '<div class="ml-auto">' +
+                                                    '<span class="badge badge-soft-success">' +
+                                                    '<i class="fas fa-check-circle mr-1"></i>Active' +
+                                                    '</span>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '<div class="text-left text-black">' +
+                                                    `${response.bank.firstName} ${response.bank.lastName}` +
+                                                    '</div>' +
+                                                    requiredMadBankInfo +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+
+                                                const addBankCol = $('#add-bank-col');
+                                                addBankCol.removeClass();
+                                                addBankCol.addClass('d-flex justify-content-center col-12 col-md-6 col-xl-4 mb-3');
+
+                                                $(newMadBankBody).insertBefore('#add-bank-col');
+
+                                                $(`button[data-send-to-bank="${response.bank.id}"]`).click(function () {
+                                                    FuncConfirmBankDeposit($(this));
+                                                })
+
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleMadBankError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleMadBankError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            }
+                        })
+                    } else HandleMadBankError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function FuncConfirmBankDeposit(bankElement) {
+                let node = $(bankElement);
+                let bankElementText = node.find('span');
+                let bankElementTextUnchanged = bankElementText.html();
+                const bankId = node.attr('data-send-to-bank');
+
+                $('button[data-send-to-bank]').prop('disabled', true);
+
+                const width = node.width();
+                const height = node.height();
+                bankElementText.fadeOut('fast', function () {
+                    bankElementText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: white;"></div>').fadeIn('slow');
+                    node.width(width);
+                    node.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetBankWithdrawCapturePage", "Banks", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            bankId: bankId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    bankElementText.fadeOut('fast', function () {
+                                        bankElementText.html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[response.severity](response.body, response.title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                bankElementText.fadeOut('fast', function () {
+                                                    $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                                    $('button[data-send-to-bank]').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            bankElementText.fadeOut('fast', function () {
+                                $(this).html('<i class="fas fa-times text-white no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        bankElementText.fadeOut('fast', function () {
+                                            $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                            $('button[data-send-to-bank]').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            }
+
+            $('.btn-close-mad-modal').click(function () {
+                madBankModal.modal('hide');
+                $('#new-bank-currency-modal').modal('show');
+            })
+
+            function MadElementIsValid(element) {
+                return madForm.validate().element($(element));
+            }
+
+            function MadFormIsValid() {
+                const firstNameValid = MadElementIsValid(madFirstName);
+                const lastNameValid = MadElementIsValid(madLastName);
+                const ribValid = MadElementIsValid(madRib);
+
+                return (firstNameValid && lastNameValid && ribValid);
+            };
+
+            function EnableMadInputs() {
+                madFirstName.prop('readonly', false);
+                madLastName.prop('readonly', false);
+                madRib.prop('readonly', false);
+
+                btnSaveMad.prop('disabled', false);
+                madTimes.prop('disabled', false);
+                madCancel.prop('disabled', false);
+            }
+
+            function DisableMadInputs() {
+                madFirstName.prop('readonly', true);
+                madLastName.prop('readonly', true);
+                madRib.prop('readonly', true);
+
+                btnSaveMad.prop('disabled', true);
+                madTimes.prop('disabled', true);
+                madCancel.prop('disabled', true);
+            }
+
+            function HandleMadBankError(title, body, severity) {
+                btnSaveMadText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveMadText.fadeOut('fast', function () {
+                                $(this).html(btnSaveMadTextUnchanged).fadeIn('slow');
+                                EnableMadInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>)

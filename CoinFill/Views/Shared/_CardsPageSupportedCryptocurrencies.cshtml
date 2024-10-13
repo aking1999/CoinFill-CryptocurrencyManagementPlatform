@@ -1,0 +1,37 @@
+﻿<div id="cards-page-supported-cryptocurrencies-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Supported cryptocurrencies and networks</h5>
+                <button id="supported-cryptocurrencies-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                @await Component.InvokeAsync("SupportedCryptocurrencies") 
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const cardTypeModal2 = $('#card-type-modal');
+        const supportedCryptoModal = $('#cards-page-supported-cryptocurrencies-modal');
+
+
+        $('button[data-toggle="modal"]').click(function () {
+            cardTypeModal2.modal('hide')
+        })
+
+        supportedCryptoModal.on('hide.bs.modal', function () {
+            cardTypeModal2.modal('show');
+        })
+    })
+</script>

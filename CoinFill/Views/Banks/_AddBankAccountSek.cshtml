@@ -1,0 +1,359 @@
+﻿@model CoinFill.ViewModels.BankAccountTypes.AddBankAccountSek
+@using CoinFill.Helpers.Extensions
+
+<div id="sek-bank-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Enter your bank information</h5>
+                <button id="sek-bank-times" type="button" class="btn-close-sek-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="sek-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <i class="fas fa-university text-secondary fa-3x mr-n2"></i>
+                            <img src="~/images/static/bank-currencies/SEK.svg" width="24" height="24" alt="SEK" class="ml-n3 rounded-circle" />
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="SekAccountHolderFirstName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="SekAccountHolderFirstName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="SekAccountHolderFirstName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="SekAccountHolderLastName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="SekAccountHolderLastName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="SekAccountHolderLastName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">
+                                    SEK Bank Account Information
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="SekBicSwift"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="SekBicSwift" class="form-control" />
+                                </div>
+                                <span asp-validation-for="SekBicSwift" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="SekIBAN"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="SekIBAN" class="form-control" />
+                                </div>
+                                <span asp-validation-for="SekIBAN" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-save-sek-bank" class="btn btn-primary btn-block m-0 mb-3">
+                    <span>Save bank account</span>
+                </button>
+                <button id="btn-cancel-sek-bank" class="btn-close-sek-modal btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            let sekFirstName = $('#SekAccountHolderFirstName');
+            let sekLastName = $('#SekAccountHolderLastName');
+            let sekBicSwift = $('#SekBicSwift');
+            let sekIban = $('#SekIBAN');
+
+            let btnSaveSek = $('#btn-save-sek-bank');
+            let btnSaveSekText = btnSaveSek.find('span');
+            let btnSaveSekTextUnchanged = btnSaveSekText.html();
+
+            const sekTimes = $('#sek-bank-times');
+            const sekCancel = $('#btn-cancel-sek-bank');
+
+            const sekForm = $('#sek-form');
+            const sekBankModal = $('#sek-bank-modal');
+
+            btnSaveSek.click(function () {
+                DisableSekInputs();
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnSaveSekText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSaveSek.width(width);
+                    btnSaveSek.height(height);
+                });
+
+                setTimeout(function () {
+                    if (SekFormIsValid()) {
+                        let formData = new FormData(sekForm.get(0));
+                        formData.append('sekAccount.SekAccountHolderFirstName', sekFirstName.val());
+                        formData.append('sekAccount.SekAccountHolderLastName', sekLastName.val());
+                        formData.append('sekAccount.SekAccountCurrency', 'SEK');
+                        formData.append('sekAccount.SekBicSwift', sekBicSwift.val());
+                        formData.append('sekAccount.SekIBAN', sekIban.val());
+
+                        $.ajax({
+                            url: '@Url.Action("AddSekBankAccount", "Banks", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveSekText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                sekBankModal.modal('hide');
+                                                EnableSekInputs();
+                                                btnSaveSekText.html(btnSaveSekTextUnchanged);
+
+                                                let requiredSekBankInfo = '<div class="text-left">' +
+                                                    `BIC/SWIFT: ${response.bank.bicSwift}` +
+                                                    '</div>' +
+                                                    '<div class="text-left">' +
+                                                    `IBAN: ${response.bank.bankAccountNumber}` +
+                                                    '</div>' +
+                                                    `<button data-send-to-bank="${response.bank.id}" class="btn btn-soft-info btn-block mt-auto">` +
+                                                    '<span>&nbsp;Deposit cryptocurrencies&nbsp;</span>' +
+                                                    '</button>';
+
+                                                let newSekBankBody = '<div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">' +
+                                                    '<div class="card card-span" style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">' +
+                                                    '<div class="card-body d-flex flex-column">' +
+                                                    '<div class="card-img-top mb-3 d-flex justify-content-start">' +
+                                                    '<div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">' +
+                                                    '<i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>' +
+                                                    `<img src="/images/static/bank-currencies/${response.bank.currency}.svg" width="24" height="24" alt="${response.bank.currency}" class="rounded-circle ml-n4 mt-4" />` +
+                                                    '</div>' +
+                                                    '<span class="ml-3 text-left">' +
+                                                    '<span class="font-weight-semi-bold text-black">' +
+                                                    `${response.bank.currency} Bank Account` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Bank ID: ${response.bank.id}` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Deposit fee: ${response.bank.fee}%` +
+                                                    '</span>' +
+                                                    '</span>' +
+                                                    '<div class="ml-auto">' +
+                                                    '<span class="badge badge-soft-success">' +
+                                                    '<i class="fas fa-check-circle mr-1"></i>Active' +
+                                                    '</span>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '<div class="text-left text-black">' +
+                                                    `${response.bank.firstName} ${response.bank.lastName}` +
+                                                    '</div>' +
+                                                    requiredSekBankInfo +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+
+                                                const addBankCol = $('#add-bank-col');
+                                                addBankCol.removeClass();
+                                                addBankCol.addClass('d-flex justify-content-center col-12 col-md-6 col-xl-4 mb-3');
+
+                                                $(newSekBankBody).insertBefore('#add-bank-col');
+
+                                                $(`button[data-send-to-bank="${response.bank.id}"]`).click(function () {
+                                                    FuncConfirmBankDeposit($(this));
+                                                })
+
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleSekBankError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleSekBankError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            }
+                        })
+                    } else HandleSekBankError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function FuncConfirmBankDeposit(bankElement) {
+                let node = $(bankElement);
+                let bankElementText = node.find('span');
+                let bankElementTextUnchanged = bankElementText.html();
+                const bankId = node.attr('data-send-to-bank');
+
+                $('button[data-send-to-bank]').prop('disabled', true);
+
+                const width = node.width();
+                const height = node.height();
+                bankElementText.fadeOut('fast', function () {
+                    bankElementText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: white;"></div>').fadeIn('slow');
+                    node.width(width);
+                    node.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetBankWithdrawCapturePage", "Banks", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            bankId: bankId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    bankElementText.fadeOut('fast', function () {
+                                        bankElementText.html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[response.severity](response.body, response.title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                bankElementText.fadeOut('fast', function () {
+                                                    $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                                    $('button[data-send-to-bank]').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            bankElementText.fadeOut('fast', function () {
+                                $(this).html('<i class="fas fa-times text-white no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        bankElementText.fadeOut('fast', function () {
+                                            $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                            $('button[data-send-to-bank]').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            }
+
+            $('.btn-close-sek-modal').click(function () {
+                sekBankModal.modal('hide');
+                $('#new-bank-currency-modal').modal('show');
+            })
+
+            function SekElementIsValid(element) {
+                return sekForm.validate().element($(element));
+            }
+
+            function SekFormIsValid() {
+                const firstNameValid = SekElementIsValid(sekFirstName);
+                const lastNameValid = SekElementIsValid(sekLastName);
+                const bicSwiftValid = SekElementIsValid(sekBicSwift);
+                const ibanValid = SekElementIsValid(sekIban);
+
+                return (firstNameValid && lastNameValid &&
+                    bicSwiftValid && ibanValid);
+            };
+
+            function EnableSekInputs() {
+                sekFirstName.prop('readonly', false);
+                sekLastName.prop('readonly', false);
+                sekBicSwift.prop('readonly', false);
+                sekIban.prop('readonly', false);
+
+                btnSaveSek.prop('disabled', false);
+                sekTimes.prop('disabled', false);
+                sekCancel.prop('disabled', false);
+            }
+
+            function DisableSekInputs() {
+                sekFirstName.prop('readonly', true);
+                sekLastName.prop('readonly', true);
+                sekBicSwift.prop('readonly', true);
+                sekIban.prop('readonly', true);
+
+                btnSaveSek.prop('disabled', true);
+                sekTimes.prop('disabled', true);
+                sekCancel.prop('disabled', true);
+            }
+
+            function HandleSekBankError(title, body, severity) {
+                btnSaveSekText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveSekText.fadeOut('fast', function () {
+                                $(this).html(btnSaveSekTextUnchanged).fadeIn('slow');
+                                EnableSekInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>)

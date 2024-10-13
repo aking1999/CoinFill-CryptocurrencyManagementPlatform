@@ -1,0 +1,243 @@
+﻿@model CoinFill.ViewModels.RegisterViewModel
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Register");
+    ViewData.SetMetaDescription("Skyrocket your wealth with all the cryptocurrency possibilities that CoinFill offers.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row flex-center no-gutters" style="min-height: 80vh !important;">
+    <div class="col-lg-10">
+        <div class="row no-gutters h-100">
+            <div class="col-md-6 text-center">
+                <div class="position-relative p-4 pt-md-5">
+                    <div class="z-index-1 position-relative">
+                        <a asp-controller="Home" asp-action="Index" class="text-primary mb-2 font-weight-medium fs-4 d-inline-block text-decoration-none">C<i class="far align-middle fa-usd-circle text-primary" style="font-size: 0.68em !important;"></i>inFill</a>
+                        <div class="row flex-center text-left px-4 px-md-3 px-lg-1">
+                            <div class="mx-auto mx-lg-0">
+                                <div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Get a crypto prepaid card
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Stake cryptocurrencies for 6.5% - 82% APY
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                No KYC
+                                                <i data-toggle="popover"
+                                                   data-placement="bottom"
+                                                   data-content="No KYC required for transactions less than $35000."
+                                                   class="fas fa-info-circle text-info ml-1"></i>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                4% cashback cards
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Withdraw the funds directly to your bank account
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Withdraw the funds directly to your PayPal account
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-md-5">
+                    <p>Have an account?<br><a asp-controller="Authorization" asp-action="SignIn" class="btn btn-outline-primary mt-2 px-4">Sign In</a></p>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex flex-center">
+                <div class="card mb-6 mb-md-0">
+                    <div class="card-body p-0">
+                        <div class="p-4 p-md-5 flex-grow-1">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <h3 class="mb-3">Register</h3>
+                            <form id="register-form" asp-area="" asp-controller="Authorization" asp-action="Register" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="form-row">
+                                    <div class="form-group col-6">
+                                        <label asp-for="FirstName"></label>
+                                        <input asp-for="FirstName" class="form-control" />
+                                        <span asp-validation-for="FirstName" class="invalid-feedback"></span>
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label asp-for="LastName"></label>
+                                        <input asp-for="LastName" class="form-control" />
+                                        <span asp-validation-for="LastName" class="invalid-feedback"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Email"></label>
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="invalid-feedback"></span>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-6">
+                                        <label asp-for="Password"></label>
+                                        <input asp-for="Password" class="form-control" />
+                                        <span asp-validation-for="Password" class="invalid-feedback"></span>
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label asp-for="ConfirmPassword"></label>
+                                        <input asp-for="ConfirmPassword" class="form-control" />
+                                        <span asp-validation-for="ConfirmPassword" class="invalid-feedback"></span>
+                                    </div>
+                                </div>
+                                <div class="fs--1">
+                                    By continuing, you agree with the <a asp-controller="Home" asp-action="Terms" target="_blank">terms</a>
+                                    and
+                                    <a asp-controller="Home" asp-action="Privacy" target="_blank">privacy policy</a>.
+                                </div>
+                                <div class="form-group mb-0">
+                                    <button id="btn-register" class="btn btn-primary btn-block mt-3" type="button">
+                                        <span id="btn-register-text">&nbsp;Register&nbsp;</span>
+                                    </button>
+                                </div>
+                            </form>
+                            @*<div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">or register with</div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <div class="row no-gutters">
+                                    <div class="col-sm-12">
+                                        <a class="btn btn-falcon-secondary btn-sm btn-block mt-2" href="#">
+                                            <img src="~/images/static/assets/google.svg" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('footer').remove();
+            $('main').removeClass('pb-3');
+
+            const firstName = $('#FirstName');
+            const lastName = $('#LastName');
+            const email = $('#Email');
+            const password = $('#Password');
+            const confirmPassword = $('#ConfirmPassword');
+            const registerForm = $('#register-form');
+            const submit = $('#btn-register');
+            const submitText = submit.find('#btn-register-text');
+            const submitTextUnchanged = submitText.html();
+
+            submit.click(function (e) {
+                e.preventDefault();
+                DisableInputs();
+                let height = $(this).height();
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    submit.height(height);
+                });
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        submitText.fadeOut('fast', function () {
+                            $(this)
+                                .html('<i class="ca-lightgreen fas fa-check"></i>')
+                                .fadeIn('slow', function () {
+                                    setTimeout(function () {
+                                        registerForm.submit();
+                                    }, 600);
+                                });
+                        })
+                    } else {
+                        submitText
+                            .fadeOut("fast", function () {
+                                $(this)
+                                    .html('<i class="text-danger fas fa-times"></i>')
+                                    .fadeIn("slow");
+                                toastr["info"](null, "Fill all the required fields");
+                            })
+                            .promise()
+                            .done(function () {
+                                setTimeout(function () {
+                                    submitText.fadeOut("fast", function () {
+                                        $(this).html(submitTextUnchanged).fadeIn("slow");
+                                        EnableInputs();
+                                    });
+                                }, 600);
+                            });
+                    }
+                }, 600)
+            })
+
+            function ElementIsValid(element) {
+                return registerForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                const firstNameValid = ElementIsValid(firstName);
+                const lastNameValid = ElementIsValid(lastName);
+                const emailValid = ElementIsValid(email);
+                const passwordValid = ElementIsValid(password);
+                const confirmPasswordValid = ElementIsValid(confirmPassword);
+
+                return (firstNameValid && lastNameValid &&
+                    emailValid && passwordValid &&
+                    confirmPasswordValid);
+            }
+
+            function EnableInputs() {
+                submit.prop('disabled', false);
+                firstName.prop('readonly', false);
+                lastName.prop('readonly', false);
+                email.prop('readonly', false);
+                password.prop('readonly', false);
+                confirmPassword.prop('readonly', false);
+            }
+
+            function DisableInputs() {
+                submit.prop('disabled', true);
+                firstName.prop('readonly', true);
+                lastName.prop('readonly', true);
+                email.prop('readonly', true);
+                password.prop('readonly', true);
+                confirmPassword.prop('readonly', true);
+            }
+        })
+    </script>
+}
+

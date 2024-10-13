@@ -1,0 +1,79 @@
+﻿@model List<CoinFill.ViewModels.CryptocurrencyTvlViewModel>
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Your stakes");
+    ViewData.SetMetaDescription("Manage every cryptocurrency that you are staking with each validator.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .btn-group-vertical > .btn:not(:first-child),
+        .btn-group-vertical > .btn:not(:last-child):not(.dropdown-toggle) {
+            border-top-left-radius: 0.4rem !important;
+            border-top-right-radius: 0.4rem !important;
+            border-bottom-left-radius: 0.4rem !important;
+            border-bottom-right-radius: 0.4rem !important;
+        }
+    </style>
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fas fa-layer-group",
+        "text-primary",
+        ViewData.GetTitle() + " - Demo",
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row">
+    @foreach (var cryptocurrency in Model)
+    {
+        <div class="col-12 mb-3" style="user-select: none;">
+            <div class="card card-span">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-3xl text-center p-2 rounded-soft mr-3"
+                             data-toggle="set-color-and-background-color"
+                             data-color="@cryptocurrency.CryptocurrencyColor"
+                             style="width:3.7rem!important;height:3.7rem!important;">
+                            <img src="~/images/static/cryptocurrencies/@cryptocurrency.CryptocurrencyIcon"
+                                 class="rounded-circle p-0 border-0 d-inline-block"
+                                 loading="lazy"
+                                 alt="@cryptocurrency.CryptocurrencyName"
+                                 style="min-width: 2.5rem !important; min-height: 2.5rem !important;" />
+                        </div>
+                        <span class="font-weight-semi-bold text-black">
+                            <span>@cryptocurrency.CryptocurrencyName</span>
+                            <br />
+                            <span class="font-weight-medium text-secondary fs--1">Staking: @cryptocurrency.MyTvl</span>
+                        </span>
+                        <span class="badge badge-soft-primary ml-auto fs-0 fs-md-1">
+                            @cryptocurrency.MaxApy% APY
+                        </span>
+                        <div class="ml-auto btn-group-vertical">
+                            <button data-demo-account="true"
+                                    class="btn btn-primary btn-sm d-block mb-2">
+                                Stake
+                            </button>
+                            <button data-demo-account="true" class="btn btn-outline-danger btn-sm">
+                                Unstake
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script async src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+}

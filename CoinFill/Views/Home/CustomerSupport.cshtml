@@ -1,0 +1,309 @@
+﻿@model CoinFill.ViewModels.CustomerSupportViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Support");
+    ViewData.SetMetaDescription("Easily contact our sales, support and marketing departments. Also send us your questions and we would love to answer them.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <div class="card h-100">
+            <div class="card-header border-bottom-0">
+                <h5 class="mb-0 text-secondary fs-1">Contact us</h5>
+            </div>
+            <div class="card-body">
+                <form id="ticket-form" autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label asp-for="Chosen_TopicId"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fal fa-question fa-fw"></i></span>
+                            </div>
+                            <select asp-for="Chosen_TopicId"
+                                    data-dropup-auto="false"
+                                    class="selectpicker form-control"
+                                    data-live-search="true"
+                                    title="Choose a topic"
+                                    data-size="4">
+                                @if (Model.ToChooseFrom_Topics != null && Model.ToChooseFrom_Topics.Any())
+                                {
+                                    foreach (var topic in Model.ToChooseFrom_Topics)
+                                    {
+                                        var concat = Helper.GetObjectIconAndNameAndColor(topic.Text);
+
+                                        <option value="@topic.Value" data-content="<i class='@concat[0] fa-fw mr-2' style='color:@concat[2];'></i>@concat[1]">
+                                            @concat[1]
+                                        </option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="" disabled>Topics unavailable.</option>
+                                }
+                            </select>
+                        </div>
+                        <span>
+                            <span asp-validation-for="Chosen_TopicId" class="invalid-feedback"></span>
+                            <br />
+                        </span>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="Email"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                                </div>
+                                <input asp-for="Email"
+                                       class="form-control" />
+                            </div>
+                            <span>
+                                <span asp-validation-for="Email" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="Text"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-bars fa-fw"></i></span>
+                                </div>
+                                <textarea asp-for="Text"
+                                          rows="4"
+                                          class="form-control">
+                                </textarea>
+                            </div>
+                            <span>
+                                <span asp-validation-for="Text" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-right">
+                                <button type="button"
+                                        id="btn-submit"
+                                        class="btn btn-sm btn-primary">
+                                    <span id="btn-submit-text">&nbsp;Send&nbsp;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+        <div class="card h-100">
+            <div class="card-header border-bottom-0 pb-0">
+                <h5 class="mb-0 text-secondary fs-1">Our contact emails</h5>
+            </div>
+            <div class="card-body notranslate font-weight-semi-bold" style="line-height: 2 !important;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-center d-flex flex-center p-2 rounded-medium"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:2rem!important;height:2rem!important;">
+                        <i class="fal fa-user fa-sm fa-fw"></i>
+                    </div>
+                    <a href="mailto:office@@coinfill.io" class="text-decoration-none ml-2 pl-1">office@@coinfill.io</a>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-center d-flex flex-center p-2 rounded-medium"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:2rem!important;height:2rem!important;">
+                        <i class="fal fa-building fa-sm fa-fw"></i>
+                    </div>
+                    <a href="mailto:sales@@coinfill.io" class="text-decoration-none ml-2 pl-1">sales@@coinfill.io</a>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-center d-flex flex-center p-2 rounded-medium"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:2rem!important;height:2rem!important;">
+                        <i class="fal fa-comments fa-sm fa-fw"></i>
+                    </div>
+                    <a href="mailto:support@@coinfill.io" class="text-decoration-none ml-2 pl-1">support@@coinfill.io</a>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-center d-flex flex-center p-2 rounded-medium"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:2rem!important;height:2rem!important;">
+                        <i class="fal fa-newspaper fa-sm fa-fw"></i>
+                    </div>
+                    <a href="mailto:press@@coinfill.io" class="text-decoration-none ml-2 pl-1">press@@coinfill.io</a>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="text-center d-flex flex-center p-2 rounded-medium"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:2rem!important;height:2rem!important;">
+                        <i class="fal fa-bullhorn fa-sm fa-fw"></i>
+                    </div>
+                    <a href="mailto:marketing@@coinfill.io" class="text-decoration-none ml-2 pl-1">marketing@@coinfill.io</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let submit = $('#btn-submit');
+            let submitText = $('#btn-submit-text');
+            let submitTextUnchanged = submitText.html();
+            let ticketForm = $('#ticket-form');
+            let email = $('#Email');
+            let text = $('#Text');
+            let topic = $('#Chosen_TopicId');
+
+            function TopicDropdownHighlighter() {
+                let topicParent = topic.closest('div');
+
+                if (topic.hasClass('is-valid')) {
+                    topicParent.removeClass('is-invalid');
+                    topicParent.addClass('is-valid');
+                } else if (topic.hasClass('is-invalid')) {
+                    topicParent.removeClass('is-valid');
+                    topicParent.addClass('is-invalid');
+                }
+            }
+
+            topic.change(function () {
+                let atLeastOneSelected = false;
+
+                $('#Chosen_TopicId > option').each(function () {
+                    if ($(this).is(':selected'))
+                        atLeastOneSelected = true;
+                });
+
+                if (atLeastOneSelected) {
+                    $(this).closest('div').removeClass('is-invalid');
+                    $(this).closest('div').addClass('is-valid');
+                } else {
+                    $(this).closest('div').removeClass('is-valid');
+                    $(this).closest('div').addClass('is-invalid');
+                }
+            })
+
+            submit.click(function () {
+                DisableInputs();
+                let width = submit.width();
+                let height = submit.height();
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    submit.width(width);
+                    submit.height(height);
+                })
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        let formData = new FormData(ticketForm.get(0));
+                        formData.append('support.Email', email.val());
+                        formData.append('support.Text', text.val());
+                        formData.append('support.Chosen_TopicId', topic.val());
+
+                        $.ajax({
+                            url: '@Url.Action("CustomerSupport", "Home", new { Area = "", topic = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    submitText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                }).then(() => {
+                                                    window.location.href = response.redirectUrl
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleError('An error occurred', 'Please refresh the page and try again.', 'error');
+                            }
+                        })
+                    } else HandleError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function ElementIsValid(element) {
+                return ticketForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                const emailValid = ElementIsValid(email);
+                const textValid = ElementIsValid(text);
+                const topicValid = ElementIsValid(topic);
+
+                TopicDropdownHighlighter();
+
+                return (emailValid && textValid &&
+                    topicValid);
+            }
+
+            function EnableInputs() {
+                email.prop('readonly', false);
+                submit.prop('disabled', false);
+                text.prop('readonly', false);
+            }
+
+            function DisableInputs() {
+                email.prop('readonly', true);
+                submit.prop('disabled', true);
+                text.prop('readonly', true);
+            }
+
+            function HandleError(title, body, severity) {
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title);
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            submitText.fadeOut('fast', function () {
+                                $(this).html(submitTextUnchanged).fadeIn('slow');
+                                EnableInputs();
+                            });
+                        }, 1300)
+                    });
+            }
+
+            topic.val('@Model.ToChooseFrom_Topics.Find(i => i.Selected)?.Value');
+            topic.selectpicker('refresh');
+        });
+    </script>
+}

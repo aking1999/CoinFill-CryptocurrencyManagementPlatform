@@ -1,0 +1,72 @@
+﻿@using CoinFill.Helpers.Extensions;
+@using CoinFill.PartialViewModels;
+
+@{
+    ViewData.SetTitle("Notifications");
+    ViewData.SetMetaDescription("All your notifications · Unread · Important");
+    Layout = "~/Views/Shared/_NotificationCenterLayout.cshtml";
+}
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/notification-center/notification-center.css" />
+    <link rel="stylesheet" href="~/css/notifications.css" />
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="row">
+            @await Html.PartialAsync("~/Views/Shared/Menues/_SideMenu.cshtml",
+                new SideMenuPartialViewModel("fal fa-bell", "Notifications", "text-primary",
+                    new List<SideMenuItemPartialViewModel>()
+                    {
+                        new SideMenuItemPartialViewModel("active", null, "Notifications", "All", "fal fa-envelope-open text-primary", "All"),
+                        new SideMenuItemPartialViewModel("unread-notifications", "", null, "Notifications", "Unread", "fal fa-envelope text-primary", "Unread", true),
+                        new SideMenuItemPartialViewModel("", null, "Notifications", "Important", "fal fa-star text-warning", "Important")
+                    })
+                )
+            <div class="col-lg-9">
+                <div id="notification-center-content" class="notification-ui_dd-content">
+                    <notificationsContainer id="notifications-holder" style="display: none;">
+                        <div class="card card-span mb-3">
+                            <div id="notification-list-main" class="notification-list">
+                                <div class="notification-list_icon">
+                                    <i id="notification-icon-main" class="fa-lg fa-fw no-tick"></i>
+                                </div>
+                                <div class="notification-list_detail">
+                                    <p id="notification-text-main" class="notification-text text-break"></p>
+                                    <p id="paragraph-mark-read-main" class="pt-4 mb-0">
+                                        <small id="small-mark-read-main">
+                                            <button id="mark-read-main" class="btn btn-mini btn-soft-primary border-0">
+                                                Mark as read
+                                            </button>
+                                            <i id="important-main" class="important-star fal fa-star no-tick"></i>
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="notification-list_feature-icon">
+                                    <p class="d-flex align-items-start">
+                                        <small>
+                                            <i id="check-icon-main" class="fa-fw"></i>
+                                            <span id="read-main"></span>
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </notificationsContainer>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        var url = '@await Url.GetNotificationsUrlBasedOnRole()';
+        var notificationHubUrl = '/@CoinFill.Notifications.NotificationHub.Url';
+    </script>
+    <script src="~/notification-center/notification-center-all-notifications.js"></script>
+}
+
+

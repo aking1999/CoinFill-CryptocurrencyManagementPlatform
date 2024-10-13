@@ -1,0 +1,63 @@
+﻿@using CoinFill.Helpers.Extensions
+
+<link rel="stylesheet" href="~/css/left-side-nav-bar.css" />
+
+<div class="sidebar">
+    <div class="logo-details">
+        <div class="logo_name">CoinFill</div>
+        <i tabindex="1" class="fal fa-bars no-tick" id="btn"></i>
+    </div>
+    <ul class="nav-list pl-0 text-black">
+        <li>
+            <a asp-area="" asp-controller="Account" asp-action="Profile">
+                <i class="fal fa-user"></i>
+                <span class="links_name">Profile</span>
+            </a>
+            <span class="tooltip">Profile</span>
+        </li>
+        <li>
+            <a asp-area="" asp-controller="Dashboard" asp-action="Index">
+                <i class="fal fa-chart-bar"></i>
+                <span class="links_name">Dashboard</span>
+            </a>
+            <span class="tooltip">Dashboard</span>
+        </li>
+        <li>
+            <a asp-area="" asp-controller="Dashboard" asp-action="Cards">
+                <i class="fal fa-credit-card"></i>
+                <span class="links_name">Cards</span>
+            </a>
+            <span class="tooltip">Cards</span>
+        </li>
+        <li>
+            <a asp-area="" asp-controller="Banks" asp-action="BankAccounts">
+                <i class="fal fa-university"></i>
+                <span class="links_name">Bank accounts</span>
+            </a>
+            <span class="tooltip">Bank accounts</span>
+        </li>
+        <li>
+            <a asp-area="" asp-controller="Staking" asp-action="Index">
+                <i class="fal fa-sack-dollar"></i>
+                <span class="links_name">Staking</span>
+            </a>
+            <span class="tooltip">Staking</span>
+        </li>
+        <li>
+            <a asp-area="" asp-controller="PayPal" asp-action="TransferToPayPal">
+                <i class="fab fa-paypal"></i>
+                <span class="links_name">PayPal</span>
+            </a>
+            <span class="tooltip">PayPal</span>
+        </li>
+        <li class="profile">
+            <a role="button" id="href-sign-out">
+                <i class="fal fa-sign-out-alt"></i>
+                <span class="links_name">Sign out</span>
+            </a>
+            <span class="tooltip">Sign out</span>
+        </li>
+    </ul>
+</div>
+
+@Html.PartialSectionScripts(@<script async src="~/js/left-side-nav-bar.js"></script>)

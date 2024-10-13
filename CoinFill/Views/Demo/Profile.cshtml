@@ -1,0 +1,52 @@
+﻿@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Profile");
+    ViewData.SetMetaDescription("Edit your profile photo · Address.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fal fa-user",
+        "text-info",
+        ViewData.GetTitle() + " - Demo",
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-4 mb-xs-3 mb-sm-3 mb-md-3 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-body no-tick">
+                <div class="account-settings text-center">
+                    <div class="user-profile pb-0 mb-0">
+                        <form autocomplete="off">
+                            <div class="user-avatar">
+                                <div class="avatar" data-demo-account="true">
+                                    <img id="output"
+                                         class="d-inline-block"
+                                         src="~/images/clients/demo/profile-photos/client-Leonard-Cooper.jpg"
+                                         alt="Leonard Cooper" />
+                                </div>
+                            </div>
+                        </form>
+                        <h5 class="font-weight-normal mb-3">
+                            Leonard Cooper
+                        </h5>
+                        <h6 class="font-weight-normal mb-3">leonard.cooper@gmail.com</h6>
+                    </div>
+                    <a asp-controller="Demo" asp-action="EditAddress" class="btn btn-sm btn-soft-info">
+                        <i class="far fa-edit mr-2"></i>Edit address
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

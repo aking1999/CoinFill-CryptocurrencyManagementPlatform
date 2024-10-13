@@ -1,0 +1,11 @@
+﻿@model CoinFill.PartialViewModels.NotFoundPartialViewModel
+
+@using CoinFill.Helpers.Extensions 
+
+@{
+    ViewData.SetTitle("404 - Page not found");
+    ViewData.SetMetaDescription("Requested page not found.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/ErrorPages/PartialViews/_NotFound404.cshtml", Model) 

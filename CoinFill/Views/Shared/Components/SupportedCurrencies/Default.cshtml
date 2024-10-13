@@ -1,0 +1,12 @@
+﻿@model List<CoinFill.Helpers.Models.Currency>
+
+@foreach(var currency in Model)
+{ 
+    <button data-bank-currency="@currency.ShortName" data-demo-account="true" class="btn btn-falcon-secondary btn-block mb-1">
+        <span class="d-flex flex-center">
+            <span style="background-image: url('/images/static/bank-currencies/@(currency.ShortName).svg'); background-position: center center; background-size: cover; background-repeat: no-repeat; width: 1.5rem; height: 1.5rem;"
+                  class="rounded-circle mr-1">
+            </span> @currency.ShortName
+        </span>
+    </button>
+}

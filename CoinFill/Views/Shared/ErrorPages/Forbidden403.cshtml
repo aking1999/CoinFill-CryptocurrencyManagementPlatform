@@ -1,0 +1,9 @@
+﻿@using CoinFill.Helpers.Extensions
+
+@{
+    ViewData.SetTitle("403 - Access Denied");
+    ViewData.SetMetaDescription("Access to this page is denied.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/ErrorPages/PartialViews/_Forbidden403.cshtml")

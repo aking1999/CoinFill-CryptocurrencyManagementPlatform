@@ -1,0 +1,664 @@
+﻿@model CoinFill.ViewModels.StakingViewModel
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Stake cryptocurrencies");
+    ViewData.SetMetaDescription("Stake your cryptocurrencies and earn an astonishing 68% APY.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/multiselect/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "far fa-sack-dollar",
+        "text-success",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row flex-between-center">
+            <div class="col-auto">
+                <h6 class="mb-0 font-weight-semi-bold text-black">Total staking rewards in USD</h6>
+            </div>
+            <div class="col-auto d-flex">
+                <select id="chart-month" class="custom-select custom-select-sm select-month mr-2">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">Jun</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+                <div class="dropdown text-sans-serif btn-reveal-trigger">
+                    <button class="btn btn-falcon-secondary text-700 btn-sm dropdown-toggle btn-reveal dropdown-caret-none" type="button" id="dropdown-total-saldes" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs--2"></span></button>
+                    <div class="dropdown-menu dropdown-menu-right border py-0" aria-labelledby="dropdown-total-saldes">
+                        <div class="bg-white py-2">
+                            <a asp-area="" asp-controller="Staking" asp-action="MyStakes" class="dropdown-item">
+                                <i class="fas fa-eye text-primary mr-1 fa-fw"></i>View my stakes
+                            </a>
+                            <a asp-area="" asp-controller="Staking" asp-action="ExportDataInExcel" class="dropdown-item"><i class="fas fa-file-excel text-success mr-1 fa-fw"></i>Export staking statistics</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body h-100 pr-0">
+        <div class="echart-line-total-sales h-100" data-echart-responsive="true"></div>
+    </div>
+    <div class="card-footer d-flex border-dashed-top">
+        <button id="stake-more" class="btn btn-primary ml-auto">
+            <i class="fas fa-layer-group mr-2"></i>Stake <span class="d-none d-sm-inline">a cryptocurrency</span>
+        </button>
+        <a asp-controller="Staking" asp-action="MyStakes" class="btn btn-falcon-primary ml-2">
+            View my stakes
+        </a>
+    </div>
+</div>
+
+<div id="cryptos-holder" class="row">
+    @foreach (var cryptocurrency in Model.Cryptocurrencies)
+    {
+        int i = 1;
+        <div class="col-6 col-sm-4 col-md-3 col-xl-2 mb-3 scroll-@cryptocurrency.CryptocurrencyId">
+            <div class="card h-100 card-span border">
+                <div class="card-body pb-3 d-flex flex-column">
+                    <div class="card-img-top mb-3 d-flex justify-content-start" style="user-select: none;">
+                        <div class="avatar avatar-2xl text-center p-2 rounded-soft"
+                             data-toggle="set-color-and-background-color"
+                             data-color="@cryptocurrency.CryptocurrencyColor"
+                             style="width:2.7rem!important;height:2.7rem!important;">
+                            <img class="rounded-circle p-0 border-0 d-inline-block"
+                                 src="~/images/static/cryptocurrencies/@cryptocurrency.CryptocurrencyIcon"
+                                 loading="lazy"
+                                 alt="@cryptocurrency.CryptocurrencyName" />
+                        </div>
+                        <div class="ml-2 text-black d-flex flex-center font-weight-medium" style="font-size: 0.9rem !important;">
+                            @cryptocurrency.CryptocurrencyName
+                        </div>
+                    </div>
+                    <span class="badge badge-soft-primary mb-3">
+                        Up to @cryptocurrency.MaxApy% APY
+                    </span>
+                    <div class="d-flex flex-column">
+                        <p class="fs--1 mt-auto mb-1 text-muted">Validators</p>
+                        <div class="avatar-group" style="user-select: none;">
+                            @foreach (var validator in cryptocurrency.Validators)
+                            {
+                                <div class="avatar avatar-xl mr-n3"
+                                     data-toggle="popover"
+                                     data-placement="bottom"
+                                     data-html="true"
+                                     data-content="<div class='d-flex'><div class='justify-content-start avatar avatar-xl'><img class='rounded-circle d-inline-block' style='border: 2px solid white !important;' src='/images/validators/@validator.Photo' /></div><span class='ml-2 fa--1 d-flex align-items-center font-weight-semi-bold text-black'>@validator.Name<i class='fas fa-badge-check text-primary ml-1'></i></span></div>">
+                                    <img style="border: 2px solid white !important;"
+                                         class="rounded-circle"
+                                         src="~/images/validators/@validator.Photo"
+                                         alt="Validator @validator.Name"
+                                         loading="lazy" />
+                                </div>
+                                if (cryptocurrency.Validators.Count > 3 && i >= 3)
+                                {
+                                    <div class="mr-n3 d-inline-block">
+                                        <div class="avatar avatar-xl">
+                                            <span style="border: 2px solid white !important;" class="avatar-name rounded-circle">
+                                                <span>+@(cryptocurrency.Validators.Count - 3)</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    break;
+                                }
+                                i++;
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer border-dashed-top">
+                    <button data-stake-cryptocurrency="@cryptocurrency.CryptocurrencyId" class="btn btn-sm btn-soft-primary btn-block">
+                        <span>
+                            Stake @cryptocurrency.CryptocurrencyName
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div id="validators-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose <span class="choosen-coin-name"></span> validator</h5>
+                <button type="button" class="btn-validators-close-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4">
+                <form autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex flex-center" style="user-select: none;">
+                        <div class="choosen-coin-data-color avatar avatar-3xl text-center p-2 rounded-soft mr-3"
+                             data-toggle="set-color-and-background-color"
+                             style="width:3.7rem!important;height:3.7rem!important;">
+                            <img class="choosen-coin-icon rounded-circle p-0 border-0 d-inline-block"
+                                 loading="lazy" />
+                        </div>
+                        <span class="choosen-coin-color font-weight-semi-bold">
+                            <span class="choosen-coin-name"></span>&nbsp;validators
+                            <br />
+                            <span class="font-weight-medium text-secondary fs--1">Total TVL: <span class="choosen-coin-tvl"></span></span>
+                        </span>
+                    </div>
+                    <div class="mt-4">
+                        <table class="table table-dashboard mb-0 table-borderless fs--1">
+                            <thead id="table-validators" class="bg-light">
+                                <tr class="text-900">
+                                    <th>Validator</th>
+                                    <th class="text-center">APY</th>
+                                    <th class="text-center pr-0">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="validators-holder">
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="validator-details-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto"><span class="choosen-validator-name"></span> validator details</h5>
+                <button type="button" class="validators-details-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-3 px-4 pb-0">
+                <div class="d-flex flex-center" style="user-select: none;">
+                    <div class="avatar avatar-2xl p-2 mr-0"
+                         data-toggle="set-color-and-background-color"
+                         style="width:3.7rem!important;height:3.7rem!important;">
+                        <img class="choosen-validator-photo rounded-circle p-0 border-0 d-inline-block"
+                             loading="lazy" />
+                    </div>
+                    <span class="choosen-validator-name text-black font-weight-semi-bold"></span><i data-toggle="tooltip" data-html="true" data-placement="bottom" title="Validator verified<i class='fas fa-badge-check text-primary ml-1'></i>" class="fas fa-badge-check text-primary ml-2"></i>
+                </div>
+                <div class="mt-3 w-100 text-center">
+                    <span class="badge badge-soft-primary d-flex justify-content-center" style="font-size: 1.1rem;">
+                        <span class="choosen-validator-apy"></span>&nbsp;%&nbsp;APY
+                    </span>
+                </div>
+                <div class="mt-3">
+                    <span class="font-weight-semi-bold">Total value locked (TVL):</span>&nbsp;<span class="choosen-validator-tvl"></span>&nbsp;<span class="choosen-coin-name"></span>
+                </div>
+                <div class="mt-2">
+                    <span class="font-weight-semi-bold">Minimum amount to stake:</span>&nbsp;<span class="choosen-validator-minimum-deposit"></span>&nbsp;<span class="choosen-coin-name"></span>
+                </div>
+                <div class="mt-2">
+                    <span class="font-weight-semi-bold">Rewards:</span> Every 3 hours
+                </div>
+                <div class="mt-2">
+                    <span class="font-weight-semi-bold">Unlock time:</span>&nbsp;<span class="choosen-validator-unlock-time"></span>&nbsp;hours
+                </div>
+                <div class="mt-2">
+                    <span class="font-weight-semi-bold">Your current stake:</span>&nbsp;<span id="user-current-stake"></span>&nbsp;<span class="choosen-coin-name"></span>
+                </div>
+            </div>
+            <div class="modal-footer px-4 pb-4 border-top-0 pt-3">
+                <button id="btn-stake-final" class="btn btn-primary btn-block m-0 mb-2">
+                    <span>Stake <span class="choosen-coin-name"></span></span>
+                </button>
+                <button class="btn btn-outline-danger btn-block m-0 mb-2" disabled>
+                    <span>Unstake 0&nbsp;<span class="choosen-coin-name"></span></span>
+                </button>
+                <button class="validators-details-modal btn btn-falcon-secondary btn-block m-0" data-dismiss="modal">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="~/js/charts/echarts.min.js"></script>
+    <script src="~/js/charts/chart-setup.js"></script>
+    <script src="~/multiselect/bootstrap-select.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(document).ready(function () {
+                $('main[role="main"]').removeClass('pb-3');
+            })
+
+            const choosenColor = $('.choosen-coin-color');
+            const choosenDataColor = $('.choosen-coin-data-color');
+            const choosenIcon = $('.choosen-coin-icon');
+            const choosenTvl = $('.choosen-coin-tvl');
+
+            const choosenValidatorName = $('.choosen-validator-name');
+            const choosenValidatorPhoto = $('.choosen-validator-photo');
+            const choosenValidatorTvl = $('.choosen-validator-tvl');
+            const choosenValidatorApy = $('.choosen-validator-apy');
+            const choosenValidatorMinStake = $('.choosen-validator-minimum-deposit');
+            const choosenValidatorUnlockTime = $('.choosen-validator-unlock-time');
+
+            const userCurrentStake = $('#user-current-stake');
+
+            let validatorsHolder = $('#validators-holder');
+            let validatorsModal = $('#validators-modal');
+
+            let btnStake = $('button[data-stake-cryptocurrency]');
+            let btnStakeText;
+            let btnStakeTextUnchanged;
+
+            let btnStakeFinal = $('#btn-stake-final');
+
+            let validatorDetailsModal = $('#validator-details-modal');
+
+            if (sessionStorage.getItem("choosenstakeclick") !== null) {
+                const cryptoId = sessionStorage.getItem("choosenstakeclick");
+                let target = $(`.scroll-${cryptoId}`);
+                $('html, body').animate({
+                    scrollTop: target.offset().top
+                }, 1000);
+                sessionStorage.removeItem('choosenstakeclick');
+
+                setTimeout(function () {
+                    $(`[data-stake-cryptocurrency="${cryptoId}"]`).click();
+                }, 50)
+            }
+
+            if (sessionStorage.getItem("choosenstake") !== null) {
+                let target = $(`.scroll-${sessionStorage.getItem("choosenstake")}`);
+                let targetCard = target.find('.card');
+                $('html, body').animate({
+                    scrollTop: target.offset().top
+                }, 1000);
+                sessionStorage.removeItem('choosenstake');
+
+                targetCard.addClass('border-danger');
+
+                let int = setInterval(function () {
+                    targetCard.toggleClass('border-danger');
+                }, 500);
+
+                setTimeout(function () {
+                    clearInterval(int);
+                    targetCard.removeClass('border-danger');
+                }, 5500)
+            }
+
+            $('#chart-month').val(new Date().getMonth());
+            $('#chart-month').change();
+
+            $('#stake-more').click(function () {
+                $('html, body').animate({
+                    scrollTop: $('#cryptos-holder').offset().top
+                }, 1000);
+            })
+
+            btnStake.click(function () {
+                const targetButton = $(this)
+                btnStakeText = $(this).find('span');
+                btnStakeTextUnchanged = btnStakeText.html();
+
+                btnStake.prop('disabled', true);
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnStakeText.fadeOut('fast', function () {
+                    btnStakeText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: #dfebfb;"></div>').fadeIn('slow');
+                    targetButton.width(width);
+                    targetButton.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetValidators", "Staking", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            coinId: targetButton.attr('data-stake-cryptocurrency')
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                btnStake.prop('disabled', false);
+                                validatorsModal.modal();
+
+                                $('.choosen-coin-name').html(response.cryptocurrencyName);
+                                choosenColor.css('color', response.cryptocurrencyColor);
+                                choosenIcon.attr('src', '/images/static/cryptocurrencies/' + response.cryptocurrencyIcon)
+                                choosenIcon.attr('alt', response.cryptocurrencyName);
+                                choosenDataColor.attr('data-color', response.cryptocurrencyColor);
+                                choosenTvl.html(response.totalStaked + ' ' + response.cryptocurrencyName);
+
+                                SetColorsAndBackgroundColors();
+
+                                validatorsHolder.html('');
+
+                                if (response.validators.length > 0) {
+                                    $('#table-validators').removeClass('d-none');
+                                    $.each(response.validators, function (i, obj) {
+                                        let validatorRow = '<tr class="border-bottom border-bottom card-span">' +
+                                            '<td class="pl-0">' +
+                                            '<div class="media align-items-center position-relative">' +
+                                            '<div class="avatar avatar-2xl">' +
+                                            `<img class="rounded-circle border" src="/images/validators/${obj.validatorPhoto}" alt="${obj.validatorName}">` +
+                                            '</div>' +
+                                            '<div class="media-body ml-2 pl-1">' +
+                                            `<h6 class="mb-1 font-weight-semi-bold">${obj.validatorName}` +
+                                            `<i data-toggle="tooltip" data-html="true" data-placement="bottom" title="Validator verified<i class='fas fa-badge-check text-primary ml-1'></i>" class="fas fa-badge-check text-primary ml-1"></i>` +
+                                            `</h6>` +
+                                            `<p class="font-weight-semi-bold mb-0 text-500">TVL: ${obj.totalStaked} ${response.cryptocurrencyName}</p>` +
+                                            '</div>' +
+                                            '</div>' +
+                                            '</td>' +
+                                            `<td class="align-middle text-center font-weight-semi-bold">${obj.apy} %</td>` +
+                                            '<td class="align-middle font-weight-semi-bold text-center pr-0">' +
+                                            `<button data-select-validator="${obj.validatorId}" data-select-validator-cryptocurrency="${response.cryptocurrencyId}" class="btn btn-sm btn-primary">` +
+                                            '<span>Select</span>' +
+                                            '</button>' +
+                                            '</td>' +
+                                            '</tr>';
+
+                                        validatorsHolder.append(validatorRow);
+                                    })
+
+                                    let all = validatorsHolder.find('button[data-select-validator]');
+                                    setTimeout(function () {
+                                        all.click(function () {
+                                            FuncSelectValidator($(this).attr('data-select-validator'))
+                                        });
+                                    }, 50)
+
+                                    SetEventListeners();
+                                } else {
+                                    $('#table-validators').addClass('d-none');
+                                    validatorsHolder.html(`<tr class="text-secondary font-weight-semi-bold text-center"><td colspan="3">Currently, there are no ${response.cryptocurrencyName} validators.</td></tr>`)
+                                }
+                                btnStakeText.fadeOut('fast', function () {
+                                    $(this).html(btnStakeTextUnchanged).fadeIn('slow');
+                                })
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    HandleError(response.title, response.body, response.severity);
+                                }
+                            }
+                        },
+                        error: function () {
+                            HandleError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                        }
+                    });
+                }, 1200)
+            })
+
+            function FuncSelectValidator(validatorId) {
+                let validatorElement = $(`[data-select-validator="${validatorId}"]`);
+                let validatorElementText = validatorElement.find('span');
+                let validatorElementTextUnchanged = validatorElementText.html();
+                const validatorCryptocurrencyId = validatorElement.attr('data-select-validator-cryptocurrency');
+
+                $('button[data-select-validator]').prop('disabled', true);
+                $('.btn-validators-close-modal').prop('disabled', true);
+
+                const width = validatorElement.width();
+                const height = validatorElement.height();
+                validatorElementText.fadeOut('fast', function () {
+                    validatorElementText.html('<div class="spinner mx-auto" style="border: 1px solid white; border-top-color: var(--primary);"></div>').fadeIn('slow');
+                    validatorElement.width(width);
+                    validatorElement.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetValidatorsDetails", "Staking", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            validatorId: validatorId,
+                            coinId: validatorCryptocurrencyId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                validatorElementText.fadeOut('fast', function () {
+                                    $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                        setTimeout(function () {
+                                            validatorsModal.modal('hide');
+
+                                            choosenValidatorName.html(response.validator.validatorName)
+                                            choosenValidatorPhoto.attr('src', '/images/validators/' + response.validator.validatorPhoto);
+                                            choosenValidatorPhoto.attr('alt', response.validator.validatorName);
+                                            choosenValidatorTvl.html(response.validator.totalStaked)
+                                            $('.choosen-coin-name').html(response.cryptocurrencyName);
+                                            choosenValidatorApy.html(response.validator.apy);
+                                            choosenValidatorMinStake.html(response.validator.minimumDepositAmount);
+                                            choosenValidatorUnlockTime.html(response.validator.unlockTimeHours);
+                                            userCurrentStake.html(response.userCurrentStake);
+                                            btnStakeFinal.attr('data-validator-final', response.validator.validatorId);
+                                            btnStakeFinal.attr('data-cryptocurrency-final', response.cryptocurrencyId);
+
+                                            validatorDetailsModal.modal();
+                                            $('button[data-select-validator]').prop('disabled', false);
+                                            $('.btn-validators-close-modal').prop('disabled', false);
+                                            validatorElementText.html(validatorElementTextUnchanged);
+                                        }, 600)
+                                    })
+                                })
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    validatorElementText.fadeOut('fast', function () {
+                                        validatorElementText.html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[response.severity](response.body, response.title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                validatorElementText.fadeOut('fast', function () {
+                                                    $(this).html(validatorElementTextUnchanged).fadeIn('slow');
+                                                    $('button[data-select-validator]').prop('disabled', false);
+                                                    $('.btn-validators-close-modal').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            validatorElementText.fadeOut('fast', function () {
+                                validatorElementText.html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        validatorElementText.fadeOut('fast', function () {
+                                            $(this).html(validatorElementTextUnchanged).fadeIn('slow');
+                                            $('button[data-select-validator]').prop('disabled', false);
+                                            $('.btn-validators-close-modal').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            }
+
+            btnStakeFinal.click(function () {
+                const validatorId = $(this).attr('data-validator-final');
+                const coinId = $(this).attr('data-cryptocurrency-final');
+                let btnStakeFinalText = $(this).find('span');
+                let btnStakeFinalTextUnchanged = 'Stake <span class="choosen-coin-name"></span>';
+
+                btnStakeFinal.prop('disabled', true);
+                $('button.validators-details-modal[data-dismiss="modal"]').prop('disabled', true);
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnStakeFinalText.fadeOut('fast', function () {
+                    btnStakeFinalText.html('<div class="spinner mx-auto" style="border: 1px solid white; border-top-color: var(--primary);"></div>').fadeIn('slow');
+                    btnStakeFinal.width(width);
+                    btnStakeFinal.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetValidatorDepositCapturePage", "Staking", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            validatorId: validatorId,
+                            coinId: coinId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                btnStakeFinalText.fadeOut('fast', function () {
+                                    $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                        setTimeout(function () {
+                                            validatorDetailsModal.modal('hide');
+                                            validatorsModal.modal('hide');
+                                            $('html').append(response.partialView);
+                                            btnStakeFinalText.html(btnStakeFinalTextUnchanged);
+                                            btnStakeFinal.prop('disabled', false);
+                                            $('button.validators-details-modal[data-dismiss="modal"]').prop('disabled', false);
+                                        }, 600)
+                                    })
+                                })
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    btnStakeFinalText.fadeOut('fast', function () {
+                                        $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                        HandleError(response.title, response.body, response.severity);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                btnStakeFinalText.fadeOut('fast', function () {
+                                                    $(this).html(btnStakeFinalTextUnchanged).fadeIn('slow');
+                                                    btnStakeFinal.prop('disabled', false);
+                                                    $('button.validators-details-modal[data-dismiss="modal"]').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            btnStakeFinalText.fadeOut('fast', function () {
+                                $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                HandleError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        btnStakeFinalText.fadeOut('fast', function () {
+                                            $(this).html(btnStakeFinalTextUnchanged).fadeIn('slow');
+                                            btnStakeFinal.prop('disabled', false);
+                                            $('button.validators-details-modal[data-dismiss="modal"]').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            })
+
+            //validatorDetailsModal.on('hide.bs.modal', function () {
+
+            //})
+
+            $('button.validators-details-modal[data-dismiss="modal"]').click(function () {
+                validatorsModal.modal();
+            })
+
+            function SetColorsAndBackgroundColors() {
+                $('[data-toggle="set-color-and-background-color"]').each(function () {
+                    try {
+                        const hexColor = $(this).attr("data-color");
+                        $(this).find("i").css("color", hexColor);
+
+                        let rgb = HexToRgbColor(hexColor);
+                        const hsl = RgbToHsl(rgb.r, rgb.g, rgb.b);
+                        const hslSoft = HslToHslSoft(hsl.h, hsl.s, hsl.l);
+                        const backgroundColorTemp = HslToRgb(hslSoft.h, hslSoft.s, hslSoft.l);
+                        const backgroundColor = `rgb(${backgroundColorTemp.r}, ${backgroundColorTemp.g}, ${backgroundColorTemp.b})`;
+
+                        $(this).css("background-color", backgroundColor);
+                    } catch (error) {
+                        return;
+                    }
+                });
+            }
+
+            function SetEventListeners() {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+
+            function HandleError(title, body, severity) {
+                toastr[severity](body, title);
+            }
+        });
+    </script>
+    <script async src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

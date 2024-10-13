@@ -1,0 +1,653 @@
+﻿@model CoinFill.ViewModels.DashboardViewModel
+@using CoinFill.Helpers.Extensions
+@using static CoinFill.Helpers.Providers.BankAccountDepositFeeProvider
+@{
+    ViewData.SetTitle("Dashboard");
+    ViewData.SetMetaDescription("Statistics about your crypto cards, bank accounts and stakings.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string cardsCols = "col-12";
+    string cardHolder = "";
+    string banksCols = "col-12";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #address:after {
+            content: 'Copy';
+            position: absolute;
+            right: 0;
+            margin-right: 2rem;
+            top: 30% !important;
+        }
+
+        #address.hover-border-primary:hover,
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+
+        .no-data-overlay {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            user-select: none;
+        }
+
+        .echart-line-total-cards-balance {
+            width: 8.5rem !important;
+            min-height: auto !important;
+        }
+
+        .img-currency {
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+        }
+    </style>
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/theme.css" />
+}
+
+<!--Card statistics-->
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-analytics fs--1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Dashboard" asp-action="Cards">Crypto card statistics</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Statistics about crypto card top-ups, spendings and balance.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line text-success"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Card Top-ups<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated according to last week's crypto card top-ups in USD."><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly-top-ups">$@Model.WeeklyTopUpsAmount</div>
+                        <span class="badge badge-pill fs--2 @Model.WeeklyTopUpsBadgeClass"><i class="far fa-plus mr-1"></i>@Model.WeeklyTopUpsPercentage%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="no-data-overlay text-secondary d-flex flex-center"><i class="fas fa-ban mr-2"></i>No data</div>
+                        <div class="echart-bar-weekly-card-top-ups h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-danger mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line-down text-danger"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Card Spendings
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly-spending">$@Model.WeeklySpendingsAmount</div>
+                        <span class="badge badge-pill fs--2 @Model.WeeklySpendingsBadgeClass"><i class="far fa-plus mr-1"></i>@Model.WeeklySpendingsPercentage%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="no-data-overlay text-secondary d-flex flex-center"><i class="fas fa-ban mr-2"></i>No data</div>
+                        <div class="echart-line-weekly-card-spending h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-dollar-sign text-success"></span></div>
+                    <h6 class="mb-0">
+                        Total Cards' Balance
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row h-100">
+                    <div class="col align-self-end">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1">$@Model.TotalBalanceAmount</div>
+                        <span class="badge badge-pill fs--2 @Model.TotalBalanceBadgeClass"><i class="far fa-plus mr-1"></i>@Model.TotalBalancePercentage%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="no-data-overlay text-secondary d-flex flex-center"><i class="fas fa-ban mr-2"></i>No data</div>
+                        <div class="echart-line-total-cards-balance h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <h6 class="mb-0">
+                        Most Used for Top-ups<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated based on the most frequently used cryptocurrencies from last week for topping up crypto card(s)."><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body pt-2 mt-1">
+                <div class="card-img-top mb-1 d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft @Model.MostUsedBadgeClass" style="width: 2.5rem !important; height: 2.5rem !important;">
+                        <i class="@Model.MostUsedIcon p-0 border-0 d-inline-block my-1"></i>
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>@Model.MostUsedName</span>
+                        <span class="badge @Model.MostUsedBadgeClass badge-pill fs--2 text-secondary">
+                            @Model.MostUsedTransactionsNumber transactions
+                        </span>
+                    </div>
+                </div>
+                <div class="card-img-top d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft @Model.MostUsedBadgeClass2" style="width: 2.5rem !important; height: 2.5rem !important;">
+                        <i class="@Model.MostUsedIcon2 p-0 border-0 d-inline-block my-1"></i>
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>@Model.MostUsedName2</span>
+                        <span class="badge @Model.MostUsedBadgeClass2 badge-pill fs--2 text-secondary">
+                            @Model.MostUsedTransactionsNumber2 transactions
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="row flex-between-end">
+                    <div class="col-auto align-self-center">
+                        <h6 class="font-weight-semi-bold text-black mb-0" data-anchor="data-anchor">Monthly card top-ups and spendings</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="no-data-overlay text-secondary d-flex flex-center font-weight-semi-bold fs-2" style="height: 81% !important; width: 96.5% !important;"><i class="fas fa-ban mr-2"></i>No data</div>
+                <div class="echart-bar-line-chart-example" style="min-height: 350px;" data-echart-responsive="true"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    @if (Model.Cards != null && Model.Cards.Any())
+    {
+        cardsCols = "d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3";
+        foreach (var card in Model.Cards)
+        {
+            <div class="@cardsCols text-center mb-3">
+                <div class="card card-span"
+                     style="background-image: url('/images/static/card-backgrounds/@card.BackgroundImage'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                    <div class="card-body">
+                        <div class="d-flex @card.BootstrapClasses">
+                            <img src="~/images/static/card-types-images/@card.Brand" width="@card.Width" height="@card.Height" alt="Crypto @card.Brand card" />
+                            <div class="justify-content-end ml-auto">
+                                @if (card.ActivationStatus == 1)
+                                {
+                                    <span class="badge badge-soft-success">
+                                        <i class="fas fa-check-circle mr-1"></i>Active
+                                    </span>
+                                }
+                                else if (card.ActivationStatus == 0)
+                                {
+                                    <span class="badge badge-soft-warning">
+                                        <i class="fas fa-stream mr-1"></i>Pending
+                                    </span>
+                                }
+                                else if (card.ActivationStatus == -1)
+                                {
+                                    <a href="@Url.Action("Cards", "Dashboard", new { cardId = card.Id })" class="btn btn-danger btn-mini text-decoration-none p-2">
+                                        <span>Confirm wallet</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            @if (card.ActivationStatus == 1)
+                            {
+                                <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                                    <span class="text-black fs-2 font-weight-semi-bold">$ @card.Balance</span>
+                                    <span class="d-flex align-items-center">
+                                        <a href="@Url.Action("Cards", "Dashboard", new { cardId = card.Id })" class="btn btn-mini p-2 btn-success">
+                                            <span>&nbsp;$ Add funds&nbsp;</span>
+                                        </a>
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-12 text-black fs-2 font-weight-semi-bold text-left mt-3 mb-2">
+                                    $ @card.Balance
+                                </div>
+                            }
+                            <div class="col-12 text-black text-left font-weight-medium">
+                                @card.Number
+                            </div>
+                            <div class="col-12 text-black d-flex justify-content-between">
+                                <span data-toggle="tooltip"
+                                      data-placement="bottom"
+                                      data-html="true"
+                                      title="<i class='fas fa-user text-info mr-1'></i>@card.FirstName @card.LastName"
+                                      class="font-weight-semi-bold">
+                                    @if ((card.FirstName + " " + card.LastName).Length > 14)
+                                    {
+                                        cardHolder = (card.FirstName + " " + card.LastName).TakeMax(11) + "...";
+                                    }
+                                    else
+                                    {
+                                        cardHolder = card.FirstName + " " + card.LastName;
+                                    }
+                                    @cardHolder
+                                </span>
+                                <span class="font-weight-medium">@card.ExpirationDate</span>
+                                <span class="font-weight-medium">@card.Cvv</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div id="add-card-col" class="@cardsCols text-center mb-3">
+        <a href="@Url.Action("Cards", "Dashboard", new { cardId = "add-new" })"
+           class="btn text-primary fs-1 hover-border-darker-primary text-decoration-none d-flex flex-center"
+           style="border: 2px dashed var(--primary); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem !important;">
+            <span class="d-flex flex-center">
+                <i class="fal fa-plus-circle fa-2x mr-2"></i>Create crypto card
+            </span>
+        </a>
+    </div>
+</div>
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-university fs-1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Banks" asp-action="BankAccounts">Bank accounts</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Information about your bank accounts.</p>
+    </div>
+</div>
+
+<div class="row">
+    @if (Model.BankAccounts != null && Model.BankAccounts.Any())
+    {
+        banksCols = "d-flex justify-content-center col-12 col-md-6 col-xl-4";
+        foreach (var bank in Model.BankAccounts)
+        {
+            <div class="@banksCols text-center mb-3">
+                <div class="card card-span"
+                     style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+                    <div class="card-body d-flex flex-column">
+                        <div class="card-img-top mb-3 d-flex justify-content-start">
+                            <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                                <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                                <span style="background-image: url('/images/static/bank-currencies/@(bank.Currency).svg');" class="img-currency ml-n4 mt-4"></span>
+                            </div>
+                            <span class="ml-3 text-left">
+                                <span class="font-weight-semi-bold text-black">
+                                    @bank.Currency @bank.AccountType
+                                </span>
+                                <br />
+                                <span class="fs--1">
+                                    @bank.IdLabel ID: @bank.Id
+                                </span>
+                                <br />
+                                <span class="fs--1">
+                                    Deposit fee: @bank.Fee%
+                                </span>
+                            </span>
+                            <div class="ml-auto">
+                                <span class="badge badge-soft-success">
+                                    <i class="fas fa-check-circle mr-1"></i>Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-left text-black">
+                            @bank.FirstName @bank.LastName
+                        </div>
+                        @if (bank.Currency == "EUR" || bank.Currency == "GBP" || bank.Currency == "HUF" ||
+                          bank.Currency == "NOK" || bank.Currency == "DKK" || bank.Currency == "SEK" ||
+                          bank.Currency == "RSD" || bank.Currency == "CHF" || bank.Currency == "PLN" ||
+                          bank.Currency == "CZK" || bank.Currency == "BGN" || bank.Currency == "ILS" ||
+                          bank.Currency == "BAM" || bank.Currency == "TRY" || bank.Currency == "AED" ||
+                          bank.Currency == "RON")
+                        {
+                            <div class="text-left">
+                                BIC/SWIFT: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                IBAN: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "USD")
+                        {
+                            <div class="text-left">
+                                Routing: @bank.RoutingNumber
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "CNY")
+                        {
+                            <div class="text-left">
+                                UnionPay Card Number:
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "HKD")
+                        {
+                            <div class="text-left">
+                                Bank/Clearing Code: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "IRR")
+                        {
+                            <div class="text-left">
+                                Card Number:
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "KRW")
+                        {
+                            <div class="text-left">
+                                Bank Name/Code: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "CAD")
+                        {
+                            <div class="text-left">
+                                Transit: @bank.TransitNumber
+                            </div>
+                            <div class="text-left">
+                                Institution: @bank.InstitutionNumber
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "AUD")
+                        {
+                            <div class="text-left">
+                                BSB/BIC/SWIFT: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "INR")
+                        {
+                            <div class="text-left">
+                                IFSC: @bank.Ifsc
+                            </div>
+                            <div class="text-left">
+                                Account Number: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "MXN")
+                        {
+                            <div class="text-left">
+                                CLABE (Clave Bancaria Estandarizada):
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "PKR" || bank.Currency == "RUB" || bank.Currency == "UAH")
+                        {
+                            <div class="text-left">
+                                BIC: @bank.BicSwift
+                            </div>
+                            <div class="text-left">
+                                IBAN: @bank.BankAccountNumber
+                            </div>
+                        }
+                        else if (bank.Currency == "MAD")
+                        {
+                            <div class="text-left">
+                                RIB (relevé d’identité bancaire):
+                                <br />
+                                @bank.BankAccountNumber
+                            </div>
+                        }
+                        <a href="@Url.Action("BankAccounts", "Banks", new { bankId = bank.Id })" class="btn btn-soft-info btn-block mt-auto">
+                            <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <div id="add-bank-col" class="@banksCols text-center mb-3">
+        <a href="@Url.Action("BankAccounts", "Banks", new { bankId = "add-new" })"
+           class="btn text-primary fs-1 hover-border-darker-primary text-decoration-none d-flex flex-center"
+           style="border: 2px dashed var(--primary); width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="media flex-center">
+                <div>
+                    <div>
+                        <div class="avatar avatar-2xl">
+                            <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block" src="/images/static/cryptocurrencies/btc.png" alt="Bank" loading="lazy" style="min-width: 2.5rem !important;">
+                        </div>
+                        <i class="far fa-long-arrow-right align-middle text-secondary"></i>
+                        <i class="fas fa-university fa-lg align-middle text-secondary mr-2" style="margin-left: 0.4rem !important;"></i>
+                    </div>
+                    Add bank account
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!--Staking statistics-->
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-analytics fs--1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Staking" asp-action="Index">Staking statistics</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Statistics about staking rewards, allocation and performance.</p>
+    </div>
+</div>
+
+<div class="row no-gutters">
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line text-success"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Staking Rewards<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated according to last week's staking rewards in USD"><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly">$@Model.WeeklyStakingRewardsAmount</div>
+                        <span class="badge badge-pill fs--2 @Model.WeeklyStakingRewardsBadgeClass"><i class="far fa-plus mr-1"></i>@Model.WeeklyStakingRewardsPercentage%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="no-data-overlay text-secondary d-flex flex-center"><i class="fas fa-ban mr-2"></i>No data</div>
+                        <div class="echart-bar-weekly-sales h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-primary mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-layer-group text-primary"></span></div>
+                    <h6 class="mb-0">
+                        Total Staking Rewards
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row h-100">
+                    <div class="col align-self-end">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1">$@Model.TotalStakingRewardsAmount</div>
+                        <span class="badge badge-pill fs--2 @Model.TotalStakingRewardsBadgeClass"><i class="far fa-plus mr-1"></i>@Model.TotalStakingRewardsPercentage%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="no-data-overlay text-secondary d-flex flex-center"><i class="fas fa-ban mr-2"></i>No data</div>
+                        <div class="echart-line-total-order h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2 pl-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-body">
+                <div class="row h-100 justify-content-between no-gutters">
+                    <div class="col-5 col-sm-6 col-xxl pr-2">
+                        <div class="mb-0 mt-2 d-flex align-items-center">
+                            <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-primary mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-percentage text-primary"></span></div>
+                            <h6 class="mb-0">
+                                Allocation
+                            </h6>
+                        </div>
+                        <div class="fs--2 mt-3">
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: @Model.StakingAllocation1Color !important;"></span><span class="font-weight-semi-bold">1. No data</span></div>
+                                <div class="d-xxl-none">60.23%</div>
+                            </div>
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: @Model.StakingAllocation2Color !important;"></span><span class="font-weight-semi-bold">2. No data</span></div>
+                                <div class="d-xxl-none">21.59%</div>
+                            </div>
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: @Model.StakingAllocation3Color !important;"></span><span class="font-weight-semi-bold">3. No data</span></div>
+                                <div class="d-xxl-none">18.18%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="echart-doughnut"></div>
+                        <div class="absolute-centered font-weight-medium text-dark fs-2" style="top: 45% !important;">$@Model.StakingAllocationTotalAmount</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    @*<div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-long-arrow-alt-up text-success"></span></div>*@
+                    <h6 class="mb-0">
+                        Top Performers
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body pt-2 mt-1">
+                <div class="card-img-top mb-1 d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft badge-soft-secondary" style="width: 2.5rem !important; height: 2.5rem !important;">
+                        <i class="@Model.TopPerformerIcon p-0 border-0 d-inline-block my-1"></i>
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>@Model.TopPerformerName</span>
+                        <span class="badge badge-pill fs--2 @Model.TopPerformerBadgeClass">
+                            <i class="far fa-plus mr-1"></i>@Model.TopPerformerPercentage%
+                        </span>
+                    </div>
+                </div>
+                <div class="card-img-top d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft badge-soft-secondary" style="width: 2.5rem !important; height: 2.5rem !important;">
+                        <i class="@Model.TopPerformer2Icon p-0 border-0 d-inline-block my-1"></i>
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>@Model.TopPerformer2Name</span>
+                        <span class="badge badge-pill fs--2 @Model.TopPerformer2BadgeClass">
+                            <i class="far fa-plus mr-1"></i>@Model.TopPerformer2Percentage%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="~/js/dayjs.min.js"></script>
+    <script src="~/js/charts/echarts.min.js"></script>
+    <script src="~/js/charts/echarts-double-bar.js"></script>
+    <script src="~/js/charts/chart-weekly-card-top-ups-setup.js"></script>
+    <script src="~/js/charts/chart-weekly-staking-rewards-setup.js"></script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=window.scroll"></script>
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+}

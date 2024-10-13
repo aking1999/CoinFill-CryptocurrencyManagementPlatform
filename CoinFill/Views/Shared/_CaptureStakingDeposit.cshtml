@@ -1,0 +1,440 @@
+﻿@model CoinFill.PartialViewModels.CaptureStakingDepositTransaction
+@using CoinFill.Helpers
+
+<div id="transaction-modal-@Model.ValidatorCryptocurrency.Validator.Id"
+     data-toggle="modal"
+     class="modal fade p-0 transaction-modal-@Model.ValidatorCryptocurrency.Validator.Id"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">@Model.HeaderText</h5>
+                <button id="transaction-methods-times" type="button" class="btn-cancel-staking-final close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4">
+                @Html.AntiForgeryToken()
+                <div class="d-flex flex-center pb-4" style="user-select: none;">
+                    <div>
+                        <div class="avatar avatar-3xl text-center p-2 d-flex mx-auto rounded-soft">
+                            <img class="rounded-circle p-0 border-0 d-inline-block"
+                                 src="~/images/validators/@Model.ValidatorCryptocurrency.Validator.Photo"
+                                 loading="lazy" />
+                        </div>
+                        <div class="font-weight-semi-bold text-black text-center mt-2" style="width: 6rem;">
+                            @Model.ValidatorCryptocurrency.Validator.Name<i data-toggle="tooltip" data-html="true" data-placement="bottom" title="Validator verified<i class='fas fa-badge-check text-primary ml-1'></i>" class="fas fa-badge-check position-absolute text-primary ml-2"></i>
+                        </div>
+                    </div>
+                    <div class="mx-3 mb-4 ml-n2" style="width: 3.5rem; height: 0.1rem; background-color: #9da9bb;"></div>
+                    <div>
+                        <div class="avatar avatar-3xl text-center p-2 rounded-soft"
+                             data-toggle="set-color-and-background-color"
+                             data-color="@Model.ValidatorCryptocurrency.Cryptocurrency.Color"
+                             style="width:3.7rem!important;height:3.7rem!important;">
+                            <img class="rounded-circle p-0 border-0 d-inline-block"
+                                 src="~/images/static/cryptocurrencies/@Model.ValidatorCryptocurrency.Cryptocurrency.Icon"
+                                 loading="lazy" />
+                        </div>
+                        <div class="font-weight-semi-bold text-center mt-2" style="color: @Model.ValidatorCryptocurrency.Cryptocurrency.Color">
+                            @Model.ValidatorCryptocurrency.Cryptocurrency.Name
+                        </div>
+                    </div>
+                    @*<i class="far fa-long-arrow-alt-right mx-3 fa-2x" style="color: #a9afb7;"></i>*@
+                </div>
+                <form autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label for="Chosen_NetworkId" class="mb-2">@Model.ChosenNetworkIdLabel</label>
+                        <select asp-for="Chosen_NetworkId"
+                                data-dropup-auto="false"
+                                class="selectpicker form-control"
+                                data-live-search="true"
+                                title="@Model.DropdownPlaceholderText"
+                                data-size="4">
+                            @if (Model.ToChooseFrom_Networks != null && Model.ToChooseFrom_Networks.Any())
+                            {
+                                foreach (var network in Model.ToChooseFrom_Networks)
+                                {
+                                    <option value="@network.Value">
+                                        @network.Text
+                                    </option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>@Model.ValidatorCryptocurrency.Cryptocurrency.Name blockchain unavailable.</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+                <div id="qr-transaction-address-holder" class="form-group flex-center no-gutters" style="display: none;">
+                    <div id="transaction-notice" class="col-12 text-center mb-2"></div>
+                    <div id="qr-transaction-address" class="avatar avatar-4xl"></div>
+                    <div class="input-group mt-2">
+                        <textarea id="transaction-address" readonly="" type="text" class="hover-border-primary col-12 text-center form-control" value="" onclick="copyToClipboard()"></textarea>
+                        <div class="input-group-append">
+                            <button id="btn-copy" type="button" class="input-group-text btn" onclick="copyToClipboard()">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="transaction-alert-body" class="alert alert-success align-items-center mb-0" role="alert" style="display: none; color: var(--ca-green) !important;">
+                    <i class="fad fa-check-circle fa-lg mr-3"></i>
+                    <div id="transaction-alert-message" class="m-auto" style="display: none;">
+                        @Html.Raw(Model.AlertMessage)
+                    </div>
+                </div>
+            </div>
+            <div id="transaction-modal-footer" class="modal-footer pt-0 border-top-0 pb-4 px-4">
+                <button id="btn-finish-staking" class="btn btn-primary btn-block m-0 mb-3" style="display: none;">
+                    <span>Done</span>
+                </button>
+                <button id="btn-cancel-transaction" class="btn-cancel-staking-final btn btn-falcon-secondary btn-block m-0" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script class="script-@Model.ValidatorCryptocurrency.Validator.Id">
+    $(document).ready(function () {
+        const validatorId = '@Model.ValidatorCryptocurrency.Validator.Id';
+        const cryptocurrencyId = '@Model.ValidatorCryptocurrency.Cryptocurrency.Id';
+        const cryptocurrencyName = '@Model.ValidatorCryptocurrency.Cryptocurrency.Name';
+        let networks = $('#Chosen_NetworkId');
+
+        const qrTransactionAddressHolder = $('#qr-transaction-address-holder');
+        const qrTransactionAddress = $('#qr-transaction-address');
+        const transactionNotice = $('#transaction-notice');
+        const transactionAddress = $('#transaction-address');
+        const btnCopy = $('#btn-copy');
+
+        const transactionAlertBody = $('#transaction-alert-body');
+        const transactionAlertMessage = $('#transaction-alert-message');
+
+        const btnFinishStaking = $('#btn-finish-staking');
+        const btnFinishStakingText = btnFinishStaking.find('span');
+        const btnFinishStakingTextUnchaned = btnFinishStakingText.html();
+
+        let transactionModal = $('#transaction-modal-' + validatorId);
+
+        SetColorsAndBackgroundColors();
+        networks.selectpicker('refresh');
+        transactionModal.modal();
+        networks.change(function () {
+            qrTransactionAddressHolder.removeClass('row').css('display', 'none');
+            transactionAlertBody.removeClass('d-flex').css('display', 'none');
+            $('#transaction-modal-footer').removeClass('pt-3').addClass('pt-0');
+            btnFinishStaking.css('display', 'none');
+            qrTransactionAddress.css(
+                {
+                    'background-image': `none`,
+                    'background-size': 'none'
+                }).addClass('avatar avatar-4xl').html('')
+
+            $.ajax({
+                url: '@Url.Action("GetUserQrCodeForTransaction", "Dashboard", new { Area = "" })',
+                type: 'POST',
+                data: {
+                    coinId: cryptocurrencyId,
+                    networkId: networks.find(":selected").val(),
+                    isStaking: true,
+                    validatorId: validatorId
+                },
+                dataType: 'json',
+                headers: {
+                    'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                },
+                success: function (response) {
+                    if (response.success === true) {
+                        if (response.generated === true) {
+                            qrTransactionAddress.css(
+                                {
+                                    'background-image': `url('/generated/deposit/addresses/${response.qrCode}')`,
+                                    'background-size': '100% 100%'
+                                })
+
+                            transactionNotice.html(response.notice);
+                            transactionAddress.val(response.address);
+
+                            transactionNotice.fadeIn(1);
+                            transactionAddress.fadeIn(1);
+                            btnCopy.fadeIn(1);
+
+                            qrTransactionAddressHolder.fadeIn(1, function () {
+                                $(this).addClass('row');
+                            });
+
+                            transactionAlertBody.fadeIn(1, function () {
+                                $(this).addClass('d-flex');
+                                transactionAlertMessage.fadeIn('slow');
+                            });
+
+                            $('#transaction-modal-footer').removeClass('pt-0').addClass('pt-3');
+                            btnFinishStaking.fadeIn('slow');
+                        } else {
+                            qrTransactionAddress
+                                .removeClass('avatar avatar-4xl')
+                                .html(
+                                    `<div id="address-not-generated" class="mb-3 text-center">You have not generated the ${cryptocurrencyName} (${$('#Chosen_NetworkId option:selected').text().trim()}) address yet. Click the button below to generate a new ${cryptocurrencyName} (${$('#Chosen_NetworkId option:selected').text().trim()}) address.</div>` +
+                                    '<span class="d-flex justify-content-center">' +
+                                    '<button id="btn-generate-transaction" class="btn btn-primary btn-sm">' +
+                                    '<span id="btn-generate-transaction-text">Generate new address</span>' +
+                                    '</button>' +
+                                    '</span>')
+
+                            transactionNotice.fadeOut(1);
+                            transactionAddress.fadeOut(1);
+                            btnCopy.fadeOut(1);
+
+                            qrTransactionAddressHolder.fadeIn('slow', function () {
+                                $(this).addClass('row');
+
+                                let btnGenerateTransaction = $('#btn-generate-transaction');
+                                let btnGenerateTransactionText = btnGenerateTransaction.find('#btn-generate-transaction-text');
+                                const btnGenerateTransactionTextUnchanged = btnGenerateTransactionText.html();
+
+                                btnGenerateTransaction.click(function () {
+                                    event.preventDefault();
+                                    event.stopImmediatePropagation();
+                                    btnGenerateTransaction.prop('disabled', true);
+                                    DisableStakingInputs();
+
+                                    let width = btnGenerateTransaction.width();
+                                    let height = btnGenerateTransaction.height();
+                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                        btnGenerateTransactionText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                                        btnGenerateTransaction.height(height);
+                                        btnGenerateTransaction.width(width);
+                                    })
+
+                                    setTimeout(function () {
+                                        $.ajax({
+                                            url: '@Url.Action("GenerateNetworkAddressForTransaction", "Dashboard", new { Area = "" })',
+                                            type: 'POST',
+                                            data: {
+                                                coinId: cryptocurrencyId,
+                                                networkId: networks.find(":selected").val(),
+                                                isStaking: true,
+                                                validatorId: validatorId
+                                            },
+                                            dataType: 'json',
+                                            headers: {
+                                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                                            },
+                                            success: function (response) {
+                                                if (response.success === true) {
+                                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                                        $(this).html('<i class="ca-lightgreen fas fa-check not-tick"></i>').fadeIn('slow', function () {
+                                                            setTimeout(function () {
+                                                                toastr[response.severity](response.body, response.title);
+                                                                qrTransactionAddress.fadeOut('fast', function () {
+                                                                    $(this).html('');
+                                                                    $(this).addClass('avatar avatar-4xl').css(
+                                                                        {
+                                                                            'background-image': `url('/generated/deposit/addresses/${response.qrCode}')`,
+                                                                            'background-size': '100% 100%'
+                                                                        });
+                                                                    qrTransactionAddressHolder.fadeIn('slow', function () {
+                                                                        $(this).addClass('row');
+                                                                        qrTransactionAddress.fadeIn('slow');
+                                                                    })
+
+                                                                    transactionNotice.html(response.notice);
+                                                                    transactionAddress.val(response.address);
+
+                                                                    transactionNotice.fadeIn('slow');
+                                                                    transactionAddress.fadeIn('slow');
+                                                                    btnCopy.fadeIn('slow');
+                                                                    transactionAlertBody.fadeIn(1, function () {
+                                                                        $(this).addClass('d-flex');
+                                                                        transactionAlertMessage.fadeIn('slow');
+                                                                    });
+                                                                    btnFinishStaking.fadeIn('slow');
+                                                                    EnableStakingInputs();
+                                                                })
+                                                            }, 600)
+                                                        });
+                                                    });
+                                                } else {
+                                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                                    else {
+                                                        btnGenerateTransactionText.fadeOut('fast', function () {
+                                                            $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                                            HandleStakingError(response.title, response.body, response.severity);
+                                                        })
+                                                            .promise()
+                                                            .done(function () {
+                                                                setTimeout(function () {
+                                                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                                                        $(this).html(btnGenerateTransactionTextUnchanged).fadeIn('slow');
+                                                                        EnableStakingInputs();
+                                                                    });
+                                                                }, 1300)
+                                                            })
+                                                    }
+                                                }
+                                            },
+                                            error: function () {
+                                                HandleStakingError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                                            }
+                                        })
+                                    }, 1200)
+                                })
+                            });
+                        }
+                    } else {
+                        if (response.redirectUrl) window.location.href = response.redirectUrl;
+                        else HandleStakingError(response.title, response.body, response.severity);
+                    }
+                },
+                error: function () {
+                    HandleStakingError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                }
+            });
+        })
+
+        btnFinishStaking.click(function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            DisableStakingInputs();
+
+            let width = btnFinishStaking.width();
+            let height = btnFinishStaking.height();
+            btnFinishStakingText.fadeOut('fast', function () {
+                btnFinishStakingText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                btnFinishStaking.height(height);
+                btnFinishStaking.width(width);
+            });
+
+            setTimeout(function () {
+                $.ajax({
+                    url: '@Url.Action("StakeDeposit", "Staking", new { Area = "" })',
+                    type: 'POST',
+                    data: {
+                        validatorId: validatorId,
+                        coinId: cryptocurrencyId,
+                        networkId: networks.find(":selected").val()
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                    },
+                    success: function (response) {
+                        if (response.success === true) {
+                            btnFinishStakingText.fadeOut('fast', function () {
+                                $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                    setTimeout(function () {
+                                        //RefreshTransactionInputs();
+                                        EnableStakingInputs();
+                                        DeleteTransactionModalAndScripts();
+
+                                        Swal.fire({
+                                            title: response.title,
+                                            text: response.body,
+                                            icon: response.severity,
+                                            confirmButtonColor: "#00d27a",
+                                            confirmButtonText: "Alright"
+                                        })
+                                    }, 600)
+                                })
+                            })
+                        } else {
+                            if (response.redirectUrl) window.location.href = response.redirectUrl;
+                            else {
+                                btnFinishStakingText.fadeOut('fast', function () {
+                                    $(this).html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                    HandleStakingError(response.title, response.body, response.severity);
+                                }).promise()
+                                    .done(function () {
+                                        setTimeout(function () {
+                                            btnFinishStakingText.fadeOut('fast', function () {
+                                                $(this).html(btnFinishStakingTextUnchaned).fadeIn('slow');
+                                                EnableStakingInputs();
+                                            })
+                                        }, 1300)
+                                    })
+                            }
+                        }
+                    },
+                    error: function () {
+                        btnFinishStakingText.fadeOut('fast', function () {
+                            $(this).html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                            HandleStakingError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                        }).promise()
+                            .done(function () {
+                                setTimeout(function () {
+                                    btnFinishStakingText.fadeOut('fast', function () {
+                                        $(this).html(btnFinishStakingTextUnchaned).fadeIn('slow');
+                                        EnableStakingInputs();
+                                    })
+                                }, 1300)
+                            })
+                    }
+                })
+            }, 1200)
+        })
+
+        $('[data-toggle="tooltip"]').tooltip();
+
+        function SetColorsAndBackgroundColors() {
+            $('[data-toggle="set-color-and-background-color"]').each(function () {
+                try {
+                    const hexColor = $(this).attr("data-color");
+                    $(this).find("i").css("color", hexColor);
+
+                    let rgb = HexToRgbColor(hexColor);
+                    const hsl = RgbToHsl(rgb.r, rgb.g, rgb.b);
+                    const hslSoft = HslToHslSoft(hsl.h, hsl.s, hsl.l);
+                    const backgroundColorTemp = HslToRgb(hslSoft.h, hslSoft.s, hslSoft.l);
+                    const backgroundColor = `rgb(${backgroundColorTemp.r}, ${backgroundColorTemp.g}, ${backgroundColorTemp.b})`;
+
+                    $(this).css("background-color", backgroundColor);
+                } catch (error) {
+                    return;
+                }
+            });
+        }
+
+        function DeleteTransactionModalAndScripts() {
+            transactionModal.modal('hide');
+            setTimeout(function () {
+                transactionModal.remove();
+                $('.transaction-modal-' + validatorId).remove();
+                $('.script-' + validatorId).remove();
+            }, 800)
+        }
+
+        function EnableStakingInputs() {
+            btnFinishStaking.prop('disabled', false);
+            $('.btn-cancel-staking-final').prop('disabled', false);
+        }
+
+        function DisableStakingInputs() {
+            btnFinishStaking.prop('disabled', true);
+            $('.btn-cancel-staking-final').prop('disabled', true);
+        }
+
+        $('button.btn-cancel-staking-final[data-dismiss="modal"]').click(function () {
+            $('#validator-details-modal').modal('hide');
+            $('#validators-modal').modal();
+
+            setTimeout(function () {
+                DeleteTransactionModalAndScripts(validatorId);
+            }, 500)
+        })
+
+        function HandleStakingError(title, body, severity) {
+            EnableStakingInputs();
+            toastr[severity](body, title);
+        }
+    })
+</script>
+<script class="script-@Model.ValidatorCryptocurrency.Validator.Id" src="~/js/clipboard.js"></script>

@@ -1,0 +1,23 @@
+﻿@model List<CoinFill.Helpers.Models.Country>
+
+<div class="row">
+    @foreach (var country in Model)
+    {
+        <div class="col-4 col-md-3 col-lg-2">
+            <div class="media align-items-center pb-1 mb-3">
+                <div class="avatar avatar-2xl">
+                    <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block"
+                         src="~/images/static/countries/@(country.Icon).svg"
+                         loading="lazy"
+                         alt="@country.Name"
+                         style="min-width: 2.5rem !important;">
+                </div>
+                <div class="media-body">
+                    <h6 class="mb-0">
+                        @country.Name
+                    </h6>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,311 @@
+﻿@model CoinFill.ViewModels.BankAccountTypes.AddBankAccountCad
+@using CoinFill.Helpers.Extensions
+
+<div id="cad-bank-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Enter your bank information</h5>
+                <button id="cad-bank-times" type="button" class="btn-close-cad-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="cad-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <i class="fas fa-university text-secondary fa-3x mr-n2"></i>
+                            <img src="~/images/static/bank-currencies/CAD.svg" width="24" height="24" alt="CAD" class="ml-n3 rounded-circle" />
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="CadAccountHolderFirstName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="CadAccountHolderFirstName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="CadAccountHolderFirstName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="CadAccountHolderLastName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="CadAccountHolderLastName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="CadAccountHolderLastName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">
+                                    CAD Bank Account Information
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="CadTransitNumber"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="CadTransitNumber" class="form-control" />
+                                </div>
+                                <span asp-validation-for="CadTransitNumber" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="CadInstitutionNumber"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="CadInstitutionNumber" class="form-control" />
+                                </div>
+                                <span asp-validation-for="CadInstitutionNumber" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="CadBankAccountNumber"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="CadBankAccountNumber" class="form-control" />
+                                </div>
+                                <span asp-validation-for="CadBankAccountNumber" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-save-cad-bank" class="btn btn-primary btn-block m-0 mb-3">
+                    <span>Save bank account</span>
+                </button>
+                <button id="btn-cancel-cad-bank" class="btn-close-cad-modal btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            let cadFirstName = $('#CadAccountHolderFirstName');
+            let cadLastName = $('#CadAccountHolderLastName');
+            let cadTransitNumber = $('#CadTransitNumber');
+            let cadInstitutionNumber = $('#CadInstitutionNumber');
+            let cadBankAccountNumber = $('#CadBankAccountNumber');
+
+            let btnSaveCad = $('#btn-save-cad-bank');
+            let btnSaveCadText = btnSaveCad.find('span');
+            let btnSaveCadTextUnchanged = btnSaveCadText.html();
+
+            const cadTimes = $('#cad-bank-times');
+            const cadCancel = $('#btn-cancel-cad-bank');
+
+            const cadForm = $('#cad-form');
+            const cadBankModal = $('#cad-bank-modal');
+
+            btnSaveCad.click(function () {
+                DisableCadInputs();
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnSaveCadText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSaveCad.width(width);
+                    btnSaveCad.height(height);
+                });
+
+                setTimeout(function () {
+                    if (CadFormIsValid()) {
+                        let formData = new FormData(cadForm.get(0));
+                        formData.append('cadAccount.CadAccountHolderFirstName', cadFirstName.val());
+                        formData.append('cadAccount.CadAccountHolderLastName', cadLastName.val());
+                        formData.append('cadAccount.CadAccountCurrency', 'CAD');
+                        formData.append('cadAccount.CadTransitNumber', cadTransitNumber.val());
+                        formData.append('cadAccount.CadInstitutionNumber', cadInstitutionNumber.val());
+                        formData.append('cadAccount.CadBankAccountNumber', cadBankAccountNumber.val());
+
+                        $.ajax({
+                            url: '@Url.Action("AddCadBankAccount", "Banks", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveCadText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                cadBankModal.modal('hide');
+                                                EnableCadInputs();
+                                                btnSaveCadText.html(btnSaveCadTextUnchanged);
+
+                                                let requiredCadBankInfo = '<div class="text-left">' +
+                                                    `Transit: ${response.bank.transitNumber}` +
+                                                    '</div>' +
+                                                    '<div class="text-left">' +
+                                                    `Institution: ${response.bank.institutionNumber}` +
+                                                    '</div>' +
+                                                    '<div class="text-left">' +
+                                                    `Account Number: ${response.bank.bankAccountNumber}` +
+                                                    '</div>' +
+                                                    `<button data-send-to-bank="${response.bank.id}" class="btn btn-soft-info btn-block mt-auto">` +
+                                                    '<span>&nbsp;Deposit cryptocurrencies&nbsp;</span>' +
+                                                    '</button>';
+
+                                                let newCadBankBody = '<div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">' +
+                                                    '<div class="card card-span" style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">' +
+                                                    '<div class="card-body d-flex flex-column">' +
+                                                    '<div class="card-img-top mb-3 d-flex justify-content-start">' +
+                                                    '<div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">' +
+                                                    '<i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>' +
+                                                    `<img src="/images/static/bank-currencies/${response.bank.currency}.svg" width="24" height="24" alt="${response.bank.currency}" class="rounded-circle ml-n4 mt-4" />` +
+                                                    '</div>' +
+                                                    '<span class="ml-3 text-left">' +
+                                                    '<span class="font-weight-semi-bold text-black">' +
+                                                    `${response.bank.currency} Bank Account` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Bank ID: ${response.bank.id}` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Deposit fee: ${response.bank.fee}%` +
+                                                    '</span>' +
+                                                    '</span>' +
+                                                    '<div class="ml-auto">' +
+                                                    '<span class="badge badge-soft-success">' +
+                                                    '<i class="fas fa-check-circle mr-1"></i>Active' +
+                                                    '</span>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '<div class="text-left text-black">' +
+                                                    `${response.bank.firstName} ${response.bank.lastName}` +
+                                                    '</div>' +
+                                                    requiredCadBankInfo +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+
+                                                const addBankCol = $('#add-bank-col');
+                                                addBankCol.removeClass();
+                                                addBankCol.addClass('d-flex justify-content-center col-12 col-md-6 col-xl-4 mb-3');
+
+                                                $(newCadBankBody).insertBefore('#add-bank-col');
+
+                                                $(`button[data-send-to-bank="${response.bank.id}"]`).click(function () {
+                                                    FuncConfirmBankDeposit($(this));
+                                                })
+
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleCadBankError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleCadBankError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            }
+                        })
+                    } else HandleCadBankError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            $('.btn-close-cad-modal').click(function () {
+                cadBankModal.modal('hide');
+                $('#new-bank-currency-modal').modal('show');
+            })
+
+            function CadElementIsValid(element) {
+                return cadForm.validate().element($(element));
+            }
+
+            function CadFormIsValid() {
+                const firstNameValid = CadElementIsValid(cadFirstName);
+                const lastNameValid = CadElementIsValid(cadLastName);
+                const transitNumberValid = CadElementIsValid(cadTransitNumber);
+                const institutionNumberValid = CadElementIsValid(cadInstitutionNumber);
+                const bankAccountValid = CadElementIsValid(cadBankAccountNumber);
+
+                return (firstNameValid && lastNameValid &&
+                    transitNumberValid && institutionNumberValid && bankAccountValid);
+            };
+
+            function EnableCadInputs() {
+                cadFirstName.prop('readonly', false);
+                cadLastName.prop('readonly', false);
+                cadTransitNumber.prop('readonly', false);
+                cadInstitutionNumber.prop('readonly', false);
+                cadBankAccountNumber.prop('readonly', false);
+
+                btnSaveCad.prop('disabled', false);
+                cadTimes.prop('disabled', false);
+                cadCancel.prop('disabled', false);
+            }
+
+            function DisableCadInputs() {
+                cadFirstName.prop('readonly', true);
+                cadLastName.prop('readonly', true);
+                cadTransitNumber.prop('readonly', true);
+                cadInstitutionNumber.prop('readonly', true);
+                cadBankAccountNumber.prop('readonly', true);
+
+                btnSaveCad.prop('disabled', true);
+                cadTimes.prop('disabled', true);
+                cadCancel.prop('disabled', true);
+            }
+
+            function HandleCadBankError(title, body, severity) {
+                btnSaveCadText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveCadText.fadeOut('fast', function () {
+                                $(this).html(btnSaveCadTextUnchanged).fadeIn('slow');
+                                EnableCadInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+</script>)

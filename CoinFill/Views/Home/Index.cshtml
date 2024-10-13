@@ -1,0 +1,1089 @@
+﻿@model CoinFill.ViewModels.IndexViewModel
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Revolutionizing Your Crypto Experience");
+    ViewData.SetMetaDescription("Cryptocurrency management & cashout/payout · Crypto Cards · High APY Staking · Crypto to Bank · Crypto to PayPal · Low fees and much more");
+    string addNewCardUrl = Url.Action("Cards", "Dashboard", new { cardId = "add-new" });
+    string getStartedUrl = User.Identity.IsAuthenticated ? Url.Action("Index", "Dashboard") : Url.Action("Register", "Authorization");
+}
+
+@section StyleSheets {
+    <style>
+        :root {
+            --transition: 0.25s;
+            --spark: 1.8s;
+        }
+
+        .animation-card {
+            opacity: 1;
+            animation: 1.5s ease-out 0s 1 slideInFromRight;
+        }
+
+        .mb-2-5rem {
+            margin-bottom: 2.5rem !important;
+        }
+
+        .animation-card:nth-child(1) {
+            animation-delay: 0.5s;
+        }
+
+        .animation-card:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .animation-card:nth-child(3) {
+            animation-delay: 1.9s;
+        }
+
+        @@keyframes slideInFromRight {
+            0% {
+                transform: translateX(20%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .line-animation::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 20%;
+            height: 20%;
+            background: black;
+            animation: animate 1s linear infinite;
+            border: 2px dashed red !important;
+        }
+
+        @@keyframes animate {
+            0% {
+                left: 0;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .crypto-slide-animation {
+            -webkit-animation: linear animate;
+            -webkit-animation-name: run;
+            -webkit-animation-duration: 1s;
+        }
+
+        @@-webkit-keyframes run {
+            0% {
+                left: 0;
+            }
+
+            100% {
+                left: 50%;
+            }
+        }
+
+        @@media (min-width: 992px) {
+            .crypto-slide-animation {
+                -webkit-animation: linear animate;
+                -webkit-animation-name: run;
+                -webkit-animation-duration: 2s;
+            }
+
+            @@-webkit-keyframes run {
+                0% {
+                    left: 0;
+                }
+
+                100% {
+                    left: 75%;
+                }
+            }
+        }
+
+        .span-animation-transitions {
+            -webkit-transition: all 0.4s ease;
+            -o-transition: all 0.4s ease;
+            transition: all 0.4s ease;
+        }
+
+        .span-animation {
+            -webkit-transform: translateY(-0.2rem);
+            -ms-transform: translateY(-0.2rem);
+            transform: translateY(-0.2rem);
+        }
+
+        .svg-spark {
+            width: 1.2rem;
+            height: 1.5rem;
+            overflow: hidden !important;
+            visibility: visible;
+        }
+
+        .sparkle-spark path {
+            color: hsl(0 0% calc((var(--active, 0) * 70%) + var(--base)));
+            transform-box: fill-box;
+            transform-origin: center;
+            fill: #6b22fc;
+            stroke: #6b22fc;
+            animation-delay: calc((var(--transition) * 1.5) + (var(--delay) * 1s));
+            animation-duration: 0.7s;
+            animation-iteration-count: infinite;
+            transition: color var(--transition);
+            animation-name: bounce-spark;
+        }
+
+        @@keyframes bounce-spark {
+            35%, 65% {
+                scale: var(--scale);
+            }
+        }
+
+        .sparkle-spark path:nth-of-type(1) {
+            --scale: 0.5;
+            --delay: 0.1;
+            --base: 40%;
+        }
+
+        .sparkle-spark path:nth-of-type(2) {
+            --scale: 1.5;
+            --delay: 0.2;
+            --base: 20%;
+        }
+
+        .sparkle-spark path:nth-of-type(3) {
+            --scale: 2.5;
+            --delay: 0.35;
+            --base: 30%;
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/rocket.css" />
+    <link rel="stylesheet" href="~/css/btn-send-paper-plane.css" />
+}
+
+<section id="hero" class="pb-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 align-self-center text-center text-md-left pb-0 pb-md-6" style="z-index: 2 !important;">
+                <h1 class="text-primary mt-3 mt-md-0 fs-5 fs-md-8 no-tick font-weight-normal" style="user-select: none;">C<i class="far align-middle fa-usd-circle text-primary" style="font-size: 0.68em !important;"></i>inFill</h1>
+                <h2 class="fs-1 mt-4 mb-0 text-black">
+                    Cryptocurrency management made easy - Deposit cryptocurrency into your CoinFill account and:
+                </h2>
+                <div class="row flex-center justify-content-lg-start align-items-lg-start text-left px-5 px-md-0">
+                    <div class="mx-auto mx-lg-0">
+                        <div class="py-3 my-1 ml-1">
+                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Get a crypto prepaid card
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Stake it and get 6.5% - 82% APY
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Get 20% bonus celebrating CoinFill launch
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Spend it with a crypto virtual or physical card
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Get the <a role="button" class="btn-link text-decoration-none" data-toggle="modal" data-target="#supported-countries-and-currencies-modal">funds</a> directly to your bank account
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="media align-items-center" style="min-height:2rem;">
+                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#2ba0ff"></i>
+                                <div class="media-body">
+                                    <h6 class="mb-0 text-black">
+                                        Get the <a role="button" class="btn-link text-decoration-none" data-toggle="modal" data-target="#supported-countries-modal">funds</a> directly to your PayPal account
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="@getStartedUrl" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 mr-2 fs-0 rounded-pill scrollto font-weight-medium" style="padding: 0.875rem 1.75rem !important; line-height: 19px !important;">
+                    Get Started
+                </a>
+
+                <a asp-controller="Demo" asp-action="Dashboard" class="rocket-button btn text-decoration-none mb-5 mb-sm-5 mb-md-2 mb-lg-0">
+                    <div class="default">Launch Demo</div>
+                    <div class="success">
+                        <svg>
+                            <use xlink:href="#check" />
+                        </svg>
+                        <div>LETS GO!</div>
+                    </div>
+                    <div class="animation">
+                        <div class="rocket">
+                            <svg>
+                                <use xlink:href="#rocket" />
+                            </svg>
+                        </div>
+                        <div class="smoke">
+                            <i></i><i></i><i></i><i></i><i></i><i></i>
+                        </div>
+                    </div>
+                </a>
+
+                <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 11" id="check">
+                        <polyline stroke="currentColor" points="1 5.5 5 9.5 12 1.5"></polyline>
+                    </symbol>
+                    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" id="rocket">
+                        <path d="M12,0 C18.6666667,8.70175439 19.7777778,19.0350877 15.3333333,31 L8.66666667,31 C4.22222222,19.0350877 5.33333333,8.70175439 12,0 Z" fill="var(--rocket)"></path>
+                        <path d="M12,0 C5.33333333,8.70175439 4.22222222,19.0350877 8.66666667,31 C6.72222222,17.9473684 7.83333333,7.61403509 12,0 Z" fill="var(--rocket-shadow-left)"></path>
+                        <path d="M12,0 C18.6666667,8.70175439 19.7777778,19.0350877 15.3333333,31 C17.2777778,17.9473684 16.1666667,7.61403509 12,0 Z" fill="var(--rocket-shadow-right)"></path>
+                        <path d="M22.2399372,27.25 C21.2403105,25.558628 19.4303122,23.808628 16.21,22 L15,31 L17.6512944,31 C18.2564684,31 18.8216022,31.042427 19.1572924,31.5292747 L21.7379379,35.271956 C22.0515593,35.7267976 22.5795404,36 23.1449294,36 C23.5649145,36 23.9142153,35.7073938 23.9866527,35.3215275 L24,35.146217 L23.9987214,35.1196135 C23.7534506,31.4421183 23.1671892,28.8189138 22.2399372,27.25 Z" fill="var(--rocket-wing-right)"></path>
+                        <path d="M1.76006278,27.25 C2.75968951,25.558628 4.56968777,23.808628 7.79,22 L9,31 L6.34870559,31 C5.74353157,31 5.17839777,31.042427 4.84270762,31.5292747 L2.2620621,35.271956 C1.94844071,35.7267976 1.42045963,36 0.855070627,36 C0.435085457,36 0.0857846604,35.7073938 0.0133472633,35.3215275 L0,35.146217 L0.00127855763,35.1196135 C0.24654935,31.4421183 0.832810758,28.8189138 1.76006278,27.25 Z" fill="var(--rocket-wing-left)"></path>
+                        <circle fill="var(--rocket-window-shadow)" cx="12" cy="12" r="3"></circle>
+                        <circle fill="var(--rocket-window)" cx="12" cy="12" r="2.5"></circle>
+                        <path d="M15.6021597,5.99977504 L8.39784027,5.99977504 C8.54788101,5.6643422 8.70496315,5.3309773 8.86908669,4.99968036 L15.1309133,4.99968036 C15.2950369,5.3309773 15.452119,5.6643422 15.6021597,5.99977504 Z" fill-opacity="0.3" fill="var(--rocket-line)"></path>
+                    </symbol>
+                </svg>
+            </div>
+            <div class="col-12 col-md-6 align-self-center pb-6" style="user-select: none !important; overflow-x: hidden !important;">
+                <div class="row">
+                    <div class="col-2 d-flex justify-content-end align-items-center pr-1 pr-md-3">
+                        <div class="avatar avatar-3xl avatar-line-animation fadein2">
+                            <img class="rounded-circle img-thumbnail shadow-sm border-0 d-inline-block"
+                                 src="/images/static/users/cardholder-robert-anderson.jpg"
+                                 alt="Cardholder Robert Anderson" loading="lazy"
+                                 style="min-width: 3.5rem !important;">
+                        </div>
+                    </div>
+                    <div class="col-2 px-1 px-sm-0 d-flex flex-center">
+                        <span id="usdt" class="avatar avatar-l position-absolute cryptocurrency" style="top: 28%; left: 0%;">
+                            <img class="d-inline-block"
+                                 src="~/images/static/cryptocurrencies/usdt.png"
+                                 alt="USDT" />
+                        </span>
+                        <svg height="50" class="fadein3" style="width: 100%;">
+                            <path d="M 0 25 L 220 25"
+                                  stroke-miterlimit="10"
+                                  fill="none"
+                                  stroke="#000000"
+                                  stroke-width="3"
+                                  stroke-dasharray="10"
+                                  stroke-dashoffset="1">
+                                <animate attributeName="stroke-dashoffset"
+                                         values="100;0"
+                                         dur="3s"
+                                         calcMode="linear"
+                                         repeatCount="indefinite" />
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="col-8 d-flex pl-1 pl-md-3">
+                        <div class="card animation-card card-span mb-3"
+                             data-trigger-animation="#usdt-card-amount"
+                             style="background-image: url('/images/static/cardholders/visa-cardholder.png'); width: 18rem; min-width: 16rem; height: 11rem; background-size: 100% 100% !important;">
+                        </div>
+                        <span id="usdt-card-amount"
+                              class="card-amount fadein1 text-black position-absolute fs-2 font-weight-semi-bold ml-3 pl-lg-1"
+                              style="top: 36% !important;">
+                            $ 0
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2 d-flex justify-content-end align-items-center pr-1 pr-md-3">
+                        <div class="avatar avatar-3xl avatar-line-animation fadein2">
+                            <img class="rounded-circle img-thumbnail shadow-sm border-0 d-inline-block"
+                                 src="/images/static/users/cardholder-michelle-johnson.jpg"
+                                 alt="Cardholder Michelle Johnson" loading="lazy"
+                                 style="min-width: 3.5rem !important;">
+                        </div>
+                    </div>
+                    <div class="col-2 px-1 px-sm-0 d-flex flex-center">
+                        <span id="btc" class="avatar avatar-l position-absolute cryptocurrency" style="top: 28%; left: 0%;">
+                            <img class="d-inline-block rounded-circle"
+                                 src="~/images/static/cryptocurrencies/btc.png"
+                                 alt="BTC" />
+                        </span>
+                        <svg height="50" class="fadein3" style="width: 100%;">
+                            <path d="M 0 25 L 220 25"
+                                  stroke-miterlimit="10"
+                                  fill="none"
+                                  stroke="#000000"
+                                  stroke-width="3"
+                                  stroke-dasharray="10"
+                                  stroke-dashoffset="1">
+                                <animate attributeName="stroke-dashoffset"
+                                         values="100;0"
+                                         dur="3s"
+                                         calcMode="linear"
+                                         repeatCount="indefinite" />
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="col-8 d-flex pl-1 pl-md-3">
+                        <div class="card animation-card card-span mb-3"
+                             data-trigger-animation="#btc-card-amount"
+                             style="background-image: url('/images/static/cardholders/mastercard-cardholder.png'); width: 18rem; min-width: 16rem; height: 11rem; background-size: 100% 100% !important;">
+                        </div>
+                        <span id="btc-card-amount"
+                              class="card-amount fadein1 text-black position-absolute fs-2 font-weight-semi-bold ml-3 pl-lg-1"
+                              style="top: 36% !important;">
+                            $ 0
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2 d-flex justify-content-end align-items-center pr-1 pr-md-3">
+                        <div class="avatar avatar-3xl avatar-line-animation fadein2">
+                            <img class="rounded-circle img-thumbnail shadow-sm border-0 d-inline-block"
+                                 src="/images/static/users/cardholder-leonard-cooper.png"
+                                 alt="Cardholder Leonard Cooper" loading="lazy"
+                                 style="min-width: 3.5rem !important;">
+                        </div>
+                    </div>
+                    <div class="col-2 px-1 px-sm-0 d-flex flex-center">
+                        <span id="sol" class="avatar avatar-l position-absolute cryptocurrency" style="top: 28%; left: 0%;">
+                            <img class="d-inline-block rounded-circle"
+                                 src="~/images/static/cryptocurrencies/sol.png"
+                                 alt="SOL" />
+                        </span>
+                        <svg height="50" class="fadein3" style="width: 100%;">
+                            <path d="M 0 25 L 220 25"
+                                  stroke-miterlimit="10"
+                                  fill="none"
+                                  stroke="#000000"
+                                  stroke-width="3"
+                                  stroke-dasharray="10"
+                                  stroke-dashoffset="1">
+                                <animate attributeName="stroke-dashoffset"
+                                         values="100;0"
+                                         dur="3s"
+                                         calcMode="linear"
+                                         repeatCount="indefinite" />
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="col-8 d-flex pl-1 pl-md-3">
+                        <div class="card animation-card card-span"
+                             data-trigger-animation="#sol-card-amount"
+                             style="background-image: url('/images/static/cardholders/amex-cardholder.png'); width: 18rem; min-width: 16rem; height: 11rem; background-size: 100% 100% !important;">
+                        </div>
+                        <span id="sol-card-amount"
+                              class="card-amount fadein1 text-black position-absolute fs-2 font-weight-semi-bold ml-3 pl-lg-1"
+                              style="top: 37% !important;">
+                            $ 0
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="benefits" class="pt-0 pb-5">
+    <div class="container container-fluid">
+        <div class="col-12">
+            <h2 class="text-center text-800">Benefits of using CoinFill account</h2>
+            <div class="heading-underline"></div>
+        </div>
+        <div class="row text-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-credit-card fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <button class="bg-transparent text-decoration-none text-800 border-0 font-weight-semi-bold cards-learn">
+                                Wide range of brands
+                            </button>
+                        </h5>
+                        <p class="mt-3 mb-0">Choose the ideal card brand from our wide selection</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <button class="bg-transparent text-decoration-none btn-link border-0 cards-learn">
+                                Cards are in USD
+                            </button>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="cf-icon-virtual-card text-primary fa-3x"></i><i class="fal fa-slash text-primary fa-2x mx-n3 p-1" style="transform: rotate(61deg); -webkit-transform: rotate(61deg);"></i><i class="fal fa-credit-card fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <button class="bg-transparent text-decoration-none text-800 border-0 font-weight-semi-bold cards-learn">
+                                Virtual / physical cards
+                            </button>
+                        </h5>
+                        <p class="mt-3 mb-0">All the brands have both physical and virtual types</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <button class="text-decoration-none btn-link border-0 cards-learn">
+                                Learn more<i class="far fa-arrow-right ml-2"></i>
+                            </button>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#00d27a"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-usd-circle fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <a asp-controller="Home" asp-action="ExclusiveRewards" class="text-800 text-decoration-none">
+                                20% on your first deposit
+                            </a>
+                        </h5>
+                        <p class="mt-3 mb-0">Get an additional 20% in USD on your first deposit</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <a class="text-decoration-none" asp-controller="Home" asp-action="ExclusiveRewards">
+                                Learn more<i class="far fa-arrow-right ml-2"></i>
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#00d27a"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-hand-holding-usd fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <button class="text-800 text-decoration-none cards-learn bg-transparent border-0">
+                                4% cashback cards
+                            </button>
+                        </h5>
+                        <p class="mt-3 mb-0">Get 4% in USD back to your card after every purchase</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            USD available immediately
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#00d27a"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-sack-dollar fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <a href="@Url.Action("HighApyStaking", "Staking")" class="text-800 text-decoration-none">
+                                Cryptocurrency staking
+                            </a>
+                        </h5>
+                        <p class="mt-3 mb-0">
+                            Stake your cryptocurrencies and get 6.5% - 82% APY
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <a class="text-decoration-none" asp-controller="Staking" asp-action="HighApyStaking">
+                                Learn more<i class="far fa-arrow-right ml-2"></i>
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-university fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <a href="@Url.Action("BankAccounts", "Banks", new { bankId = "add-new" })" class="text-800 text-decoration-none">
+                                Crypto to bank
+                            </a>
+                        </h5>
+                        <p class="mt-3 mb-0">Send cryptocurrencies and get funds to a bank account</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <button class="btn-link border-0 bg-transparent text-decoration-none" data-toggle="modal" data-target="#supported-countries-and-currencies-modal">
+                                @Model.SupportedCountriesCount supported countries
+                            </button>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fab fa-paypal fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <a href="@Url.Action("TransferToPayPal", "PayPal")" class="text-800 text-decoration-none">
+                                Crypto to PayPal
+                            </a>
+                        </h5>
+                        <p class="mt-3 mb-0">Send cryptocurrencies and get funds to a PayPal account</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            Settles in USD
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-address-card fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title text-800 my-md-auto">
+                            No KYC
+                        </h5>
+                        <p class="mt-3 mb-0">
+                            No KYC required for transactions less than $35000
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            Send no more than $34999 at once
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#00d27a"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fad fa-check-circle fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            Transparent pricing
+                        </h5>
+                        <p class="mt-3 mb-0">
+                            Prices are shown to you before making transactions
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            Transaction fees included
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                <div class="card h-100 card-span">
+                    <div class="card-body d-flex flex-column pb-0">
+                        <div class="card-img-top mb-3 d-flex justify-content-center">
+                            <div class="d-flex flex-center rounded-circle"
+                                 data-toggle="set-color-and-background-color"
+                                 data-color="#2ba0ff"
+                                 style="width: 8rem; height: 8rem;">
+                                <i class="fal fa-comments fa-4x"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title my-md-auto">
+                            <a href="@Url.Action("ContactUs", "Home")" class="text-800 text-decoration-none">
+                                Efficient support
+                            </a>
+                        </h5>
+                        <p class="mt-3 mb-0">Get a response to all your questions within half a day</p>
+                    </div>
+                    <div class="card-footer">
+                        <small>
+                            <a href="@Url.Action("ContactUs", "Home")" class="text-decoration-none">
+                                Contact us<i class="far fa-arrow-right ml-2"></i>
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="cards-showcase" class="pt-0 pb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-5 align-self-center text-center">
+                <h2 class="d-flex flex-center text-primary no-tick mb-3" style="min-height: 7.5rem !important;">
+                    <i class="cf-icon-virtual-card fa-3x text-primary"></i>
+                    Virtual crypto card
+                </h2>
+                <div class="row flex-center">
+                    <div class="col-7 col-sm-8 mx-auto">
+                        <div class="row flex-center text-left">
+                            <div class="mx-auto">
+                                <div class="pt-1">
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                All major card brands are supported:
+                                                <span class="d-block">
+                                                    <img src="~/images/static/card-svgs/visa.svg" alt="Visa" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/mastercard.svg" alt="Mastercard" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/amex.svg" alt="American Express" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/unionpay.svg" alt="UnionPay" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/discover.svg" alt="Discover" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/jcb.svg" alt="JCB" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/elo.svg" alt="ELO" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                </span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Additional 20% in USD on your first deposit
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                4% USD cashback
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">No KYC for transactions less than $35000</h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Top up the card's balance by a
+                                                <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                through your CoinFill account
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">The card is available immediately after payment verification</h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Price: 49$ (Can be paid by a
+                                                <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                of your choice)
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="@addNewCardUrl" class="btn btn-primary mb-2 mb-lg-0 rounded-pill scrollto">
+                    Get your virtual crypto card
+                </a>
+            </div>
+            <div class="col-md-2 d-flex justify-content-center">
+                <div class="border-dotted-left-4 d-none d-sm-block"></div>
+            </div>
+            <div class="col-12 col-md-5 align-self-center text-center">
+                <h2 class="d-flex flex-center text-primary no-tick mb-3" style="min-height: 7.5rem !important;">
+                    <i class="fal fa-credit-card fa-2x text-primary mr-2"></i>
+                    Physical crypto card
+                </h2>
+                <div class="row flex-center">
+                    <div class="col-7 col-sm-8 mx-auto">
+                        <div class="row flex-center text-left">
+                            <div class="mx-auto">
+                                <div class="pt-1">
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                All major card brands are supported:
+                                                <span class="d-block">
+                                                    <img src="~/images/static/card-svgs/visa.svg" alt="Visa" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/mastercard.svg" alt="Mastercard" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/amex.svg" alt="American Express" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/unionpay.svg" alt="UnionPay" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/discover.svg" alt="Discover" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/jcb.svg" alt="JCB" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                    <img src="~/images/static/card-svgs/elo.svg" alt="ELO" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                </span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Additional 20% in USD on your first deposit
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                4% USD cashback
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">No KYC for transactions less than $35000</h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Top up the card's balance by a
+                                                <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                through your CoinFill account
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Shipping to
+                                                <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#supported-countries-modal">@Model.SupportedCountriesCount supported countries</button>;
+                                                arrives in 5-7 days
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                        <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                        <div class="media-body">
+                                            <h6 class="mb-0">
+                                                Price + shipping: 149$ (Can be paid by a
+                                                <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                of your choice)
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="@addNewCardUrl" class="btn btn-primary mb-2 mb-lg-0 rounded-pill scrollto">
+                    Get your physical crypto card
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="subscription-holder" class="pt-0 pt-lg-3 pb-0">
+    <div class="container container-fluid">
+        <div class="row justify-content-center mb-3">
+            <div class="col-sm-10 col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body overflow-hidden p-4 p-sm-5">
+                        <img class="d-block mx-auto mb-4" src="~/images/static/assets/newsletter.png" height="104" width="96" alt="envelope" />
+                        <h2 class="text-center h3 mb-3 text-900">
+                            Subscribe to our Newsletter & get
+                            <br />
+                            <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <span style="color: #6b22fc !important;">Exclusive Rewards</span>
+                            <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </h2>
+                        <p class="text-center fs--1">
+                            Stay updated by email with the latest crypto news, promotions, lucrative rewards,
+                            functionalities, and more information from CoinFill.
+                        </p>
+                        <form id="newsletter-join-form" autocomplete="off">
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input asp-for="Newsletter.Email"
+                                           class="form-control mr-2"
+                                           style="border-top-right-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important;" />
+                                    <span class="input-group-btn">
+                                        <button id="newsletter-join" type="button" class="button">
+                                            <span class="default">Subscribe</span>
+                                            <span class="success text-secondary"><i class="fas fa-check text-success mr-2 no-tick"></i>Done</span>
+                                            <div class="left"></div>
+                                            <div class="right"></div>
+                                        </button>
+                                    </span>
+                                </div>
+                                <span>
+                                    <span asp-validation-for="Newsletter.Email" class="invalid-feedback"></span>
+                                    <br />
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-10 col-md-8 col-lg-6">
+                <div class="alert alert-info mb-0 text-center" role="alert">
+                    Have questions? <a asp-controller="Home" asp-action="ContactUs" target="_blank" class="text-decoration-none">Contact us</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@await Html.PartialAsync("~/Views/Shared/_SupportedCountriesAndCurrencies.cshtml", new CoinFill.PartialViewModels.SupportedCountriesAndCurrenciesPartialViewModel
+{
+    SupportedCountriesCount = Model.SupportedCountriesCount,
+    SupportedCurrenciesCount = Model.SupportedCurrenciesCount
+})
+@await Html.PartialAsync("~/Views/Shared/_SupportedCurrenciesShowcase.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_SupportedCryptocurrencies.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_SupportedCountries.cshtml")
+
+@section Scripts {
+    @if (ViewBag.Subscribe != null && (bool)ViewBag.Subscribe)
+    {
+        <script>
+            $(document).ready(function () {
+                $('html, body').animate({
+                    scrollTop: $('#subscription-holder').offset().top
+                }, 1000);
+            })
+        </script>
+    }
+    <script src="~/js/countUp.umd.js"></script>
+    <script async>
+        $(document).ready(function () {
+            let usdt = $('#usdt');
+            let btc = $('#btc');
+            let sol = $('#sol');
+
+            usdt.hide();
+            btc.hide();
+            sol.hide();
+
+            let totalUsdt = 0;
+            let totalBtc = 0;
+            let totalSol = 0;
+
+            $('#home-section').removeClass('px-2 px-lg-0');
+            $('#nav-container-main').removeClass('container mt-3');
+            $('#nav-card-main').addClass('navbar-shadow').removeClass('card mb-3');
+            $('#nav-cardbody-main').removeClass('card-body p-0');
+            $('#container-main').removeClass('container');
+            $('#container-main').addClass('px-2 px-lg-0 bg-glass-colorful');
+            $('#footer').addClass('px-2 px-lg-0');
+
+            $('.card-span').mouseover(function () {
+                let elementToAnimate = $($(this).attr('data-trigger-animation'));
+                elementToAnimate.addClass('span-animation')
+            })
+
+            $('.card-span').mouseout(function () {
+                let elementToAnimate = $($(this).attr('data-trigger-animation'));
+                elementToAnimate.removeClass('span-animation')
+            })
+
+            $('.fadein1').hide().delay(2000).fadeIn(600, function () {
+                $('.card-amount').addClass('span-animation-transitions');
+            });
+            $('.fadein2').hide().delay(2000).fadeIn(600);
+            $('.fadein3').hide().delay(3000).fadeIn(600, function () {
+                setInterval(function StartUsdtTransferAnimation() {
+                    usdt.fadeIn(600, function () {
+                        $(this).addClass('crypto-slide-animation');
+                        this.addEventListener('animationend', function (e) {
+                            e.stopImmediatePropagation();
+                            usdt.fadeOut(0).removeClass('crypto-slide-animation');
+                            let tempUsdt = totalUsdt + 100;
+                            $('#usdt-card-amount').attr('data-countup', `{"startVal":${totalUsdt}, "endValue":${tempUsdt}, "prefix":"$ "}`);
+                            totalUsdt = totalUsdt + 100;
+                            document.querySelectorAll('#usdt-card-amount[data-countup]').forEach((node) => {
+                                const { endValue, ...options } = JSON.parse($(node).attr('data-countup'));
+                                const c = new countUp.CountUp(node, endValue, {
+                                    duration: 4,
+                                    ...options
+                                });
+                                if (!c.error) {
+                                    c.start();
+                                } else {
+                                    throw new Error('CountUp error: ' + c.error);
+                                }
+                            });
+                        })
+                    });
+                    return StartUsdtTransferAnimation;
+                }(), 6000)
+
+                setInterval(function () {
+                    btc.fadeIn(600, function () {
+                        $(this).addClass('crypto-slide-animation');
+                        this.addEventListener('animationend', function (e) {
+                            e.stopImmediatePropagation();
+                            btc.fadeOut(0).removeClass('crypto-slide-animation');
+                            let tempBtc = totalBtc + 450;
+                            $('#btc-card-amount').attr('data-countup', `{"startVal":${totalBtc}, "endValue":${tempBtc}, "prefix":"$ "}`);
+                            totalBtc = totalBtc + 450;
+                            document.querySelectorAll('#btc-card-amount[data-countup]').forEach((node) => {
+                                const { endValue, ...options } = JSON.parse($(node).attr('data-countup'));
+                                const c = new countUp.CountUp(node, endValue, {
+                                    duration: 4,
+                                    ...options
+                                });
+                                if (!c.error) {
+                                    c.start();
+                                } else {
+                                    throw new Error('CountUp error: ' + c.error);
+                                }
+                            });
+                        })
+                    });
+                }, 6000)
+
+                setInterval(function () {
+                    sol.fadeIn(600, function () {
+                        $(this).addClass('crypto-slide-animation');
+                        this.addEventListener('animationend', function (e) {
+                            e.stopImmediatePropagation();
+                            sol.fadeOut(0).removeClass('crypto-slide-animation');
+                            let tempSol = totalSol + 250;
+                            $('#sol-card-amount').attr('data-countup', `{"startVal":${totalSol}, "endValue":${tempSol}, "prefix":"$ "}`);
+                            totalSol = totalSol + 250;
+                            document.querySelectorAll('#sol-card-amount[data-countup]').forEach((node) => {
+                                const { endValue, ...options } = JSON.parse($(node).attr('data-countup'));
+                                const c = new countUp.CountUp(node, endValue, {
+                                    duration: 4,
+                                    ...options
+                                });
+                                if (!c.error) {
+                                    c.start();
+                                } else {
+                                    throw new Error('CountUp error: ' + c.error);
+                                }
+                            });
+                        })
+                    });
+                }, 6000)
+            });
+
+            $('.cards-learn').click(function (event) {
+                event.preventDefault();
+                $('html, body').animate({
+                    scrollTop: $('#cards-showcase').offset().top
+                }, 1000);
+            })
+
+            if (localStorage.getItem('exclusiveOfferAppearedOnce') === null) {
+                setTimeout(function () {
+                    $('.modal').modal('hide');
+                    $('.swal-container').remove();
+                    setTimeout(function () {
+                        $('#sparkle-modal').modal();
+                    }, 50)
+
+                    const backdropClone = $('#backdrop-round').html();
+                    const svgClone = $('.particle-pen .svg-sign-in').html();
+
+                    setInterval(function () {
+                        $('#backdrop-round').html('').html(backdropClone);
+                        $('.particle-pen .svg-sign-in').html('').html(svgClone);
+                    }, 4000)
+
+                    localStorage.setItem('exclusiveOfferAppearedOnce', 'true');
+                }, 12000)
+            }
+        });
+    </script>
+    <script src="~/js/jquery.lettering.js"></script>
+    <script src="~/js/rocket.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script async src="~/js/gsap.min.js"></script>
+    <script async>
+        var newsletterSubscriptionUrl = '@Url.Action("NewsletterSubscription", "Home")';
+    </script>
+    <script async src="~/js/newsletter-subscription.js"></script>
+}
+

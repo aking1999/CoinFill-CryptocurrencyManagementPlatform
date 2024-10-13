@@ -1,0 +1,48 @@
+﻿@using CoinFill.Helpers.Extensions
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@{
+    ViewData.SetTitle("An error occurred");
+    ViewData.SetMetaDescription("Error occurred while serving your request.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center text-center">
+    <div class="col-sm-10 col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body p-4 p-sm-5">
+                <h2 class="display-1 text-300 fs-error mb-4"><i class="fas fa-times-circle text-danger"></i></h2>
+                <h4 class="mb-3">An error occurred</h4>
+                <p>We've sent the error report to our development team, and they'll be addressing it promptly.</p>
+                <hr />
+                <p>
+                    Feel free to reach out to our <a asp-area="" asp-controller="Home" asp-action="CustomerSupport">support team</a>
+                    if you have any questions, ideas, or feedback regarding our services here at
+                    @Configuration.GetSection("Application:AppName")?.Value. We're here to assist with anything you need!
+                </p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-block">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-6">
+                            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-block">
+                                <i class="fas fa-home mr-2"></i>Home
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a asp-area="" asp-controller="Authorization" asp-action="SignIn" class="btn btn-outline-primary btn-block">
+                                <i class="far fa-sign-in-alt mr-2"></i>Sign in
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

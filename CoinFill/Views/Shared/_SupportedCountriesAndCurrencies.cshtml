@@ -1,0 +1,44 @@
+﻿@model CoinFill.PartialViewModels.SupportedCountriesAndCurrenciesPartialViewModel
+@using CoinFill.Helpers.Extensions
+
+<div id="supported-countries-and-currencies-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border p-4">
+            <div class="modal-header border-bottom-0 pb-4">
+                <h5 class="modal-title text-center mx-auto">See the countries and currencies that CoinFill supports</h5>
+                <button type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <button data-toggle="modal"
+                        data-target="#supported-countries-modal"
+                        class="btn-support btn btn-sm btn-falcon-default hover-border-primary text-left w-50 py-2 mr-2">
+                    <i class="fal fa-globe fs-2 mb-2 text-primary"></i>
+                    <div>@Model.SupportedCountriesCount countries supported</div>
+                </button>
+                <button data-toggle="modal"
+                        data-target="#supported-currencies-modal"
+                        class="btn-support btn btn-sm btn-falcon-default hover-border-primary text-left w-50 py-2">
+                    <i class="fal fa-dollar-sign fs-2 mb-2 text-success"></i>
+                    <div>@Model.SupportedCurrenciesCount currencies supported</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            $('.btn-support').click(function () {
+                $('#supported-countries-and-currencies-modal').modal('hide');
+            })
+        });
+    </script>)

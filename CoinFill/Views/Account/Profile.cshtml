@@ -1,0 +1,205 @@
+﻿@model CoinFill.ViewModels.UserProfileViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment Environment
+@{
+    ViewData.SetTitle("Profile");
+    ViewData.SetMetaDescription("Edit your profile photo · Address.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fal fa-user",
+        "text-info",
+        ViewData.GetTitle(),
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-4 mb-xs-3 mb-sm-3 mb-md-3 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-body no-tick">
+                <div class="account-settings text-center">
+                    <div class="user-profile pb-0 mb-0">
+                        <form autocomplete="off">
+                            @Html.AntiForgeryToken()
+                            <div class="user-avatar">
+                                <div class="img-holder avatar">
+                                    <img id="output"
+                                         class="d-inline-block"
+                                         src="@User.GetProfilePhotoPathOrDefaultPhotoPath(Environment)"
+                                         alt="@Model.FirstName @Model.LastName profile photo" />
+                                </div>
+                                <input asp-for="ProfilePhoto" class="d-none">
+                                <span id="validation-ProfilePhoto" asp-validation-for="ProfilePhoto" class="invalid-feedback d-block mt-2"></span>
+                            </div>
+                        </form>
+                        <h5 class="font-weight-normal mb-3">
+                            @Model.FirstName @Model.LastName
+                        </h5>
+                        <h6 class="font-weight-normal mb-3">@Model.Email</h6>
+                    </div>
+                    @if (Model.HasCompletedAddress)
+                    {
+                        <a asp-controller="Account" asp-action="EditAddress" class="btn btn-sm btn-soft-info">
+                            <i class="far fa-edit mr-2"></i>Edit address
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="EditAddress" class="btn btn-sm btn-soft-info">
+                            <i class="far fa-plus mr-2"></i>Add address
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const fileExtension = ['jpeg', 'jpg', 'png'];
+            let inputImage = $("#ProfilePhoto");
+            let defaultUserImage = $('#output').attr('src');
+            let profilePhotoAlt = $('#output').attr('alt');
+
+            $('#output').click(function () {
+                inputImage.click();
+            });
+
+            inputImage.on('change', function (event) {
+                if (!this.files.length) {
+                    $('#validation-ProfilePhoto')
+                        .removeAttr('data-valmsg-replace', 'true');
+
+                    $('.img-holder').fadeOut('fast', function () {
+                        $(this).html('<i class="text-primary fas fa-spinner fa-spin no-tick" style="margin-top:42% !important;"></i>')
+                            .fadeIn(800, function () {
+                                $(this).fadeOut(800, function () {
+                                    $(this).html(`<img class="d-inline-block" src="${defaultUserImage}" alt="${profilePhotoAlt}" id="output" />`);
+                                    var image = document.getElementById("output");
+
+                                    $(this).fadeIn('slow');
+                                    inputImage.prop('readonly', false);
+
+                                    @* click listener must also be included here *@
+                                    $(image).click(function () {
+                                        inputImage.click();
+                                    });
+                                });
+                            });
+                    });
+                } else {
+                    if (!FileExtensionValid(inputImage)) {
+                        $('#validation-ProfilePhoto')
+                            .removeAttr('data-valmsg-replace')
+                            .html("Allowed formats: jpeg, jpg, png.");
+
+                        $('.img-holder').fadeOut('fast', function () {
+                            $(this).html('<i class="text-primary fas fa-spinner fa-spin no-tick" style="margin-top:42% !important;"></i>')
+                                .fadeIn(800, function () {
+                                    $(this).fadeOut(800, function () {
+                                        $(this).html(`<img class="d-inline-block" src="${defaultUserImage}" alt="${profilePhotoAlt}" id="output" />`);
+                                        var image = document.getElementById("output");
+
+                                        $(this).fadeIn('slow');
+                                        inputImage.prop('readonly', false);
+
+                                        @* click listener must also be included here *@
+                                        $(image).click(function () {
+                                            inputImage.click();
+                                        });
+                                    });
+                                });
+                        });
+                    }
+                    else if (inputImage.val().split("\\").pop().length) {
+                        inputImage.prop('readonly', true);
+                        $('#validation-ProfilePhoto').html('');
+
+                        $('.img-holder').fadeOut('fast', function () {
+                            $(this).html('<i class="text-primary fas fa-spinner fa-spin no-tick" style="margin-top:42% !important;"></i>')
+                                .fadeIn(800, function () {
+                                    let inputPhoto = document.getElementById('ProfilePhoto');
+                                    let formData = new FormData();
+                                    formData.append('photo', inputPhoto.files[0])
+                                    $.ajax({
+                                        url: '@Url.Action("EditProfile", "Account")',
+                                        type: 'POST',
+                                        data: formData,
+                                        contentType: false,
+                                        processData: false,
+                                        headers: {
+                                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                                        },
+                                        success: function (response) {
+                                            if (response.success === true) {
+                                                $('.img-holder').fadeOut(800, function () {
+                                                    $(this).html(`<img class="d-inline-block" src="" alt="${profilePhotoAlt}" id="output" />`);
+                                                    var image = document.getElementById("output");
+                                                    image.src = URL.createObjectURL(event.target.files[0]);
+                                                    toastr[response.severity](response.body, response.title);
+                                                    $(this).fadeIn('slow');
+                                                    inputImage.prop('readonly', false);
+
+                                                    $(image).click(function () {
+                                                        inputImage.click();
+                                                    });
+                                                });
+                                            } else {
+                                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                                else {
+                                                    $('.img-holder').fadeOut(800, function () {
+                                                        $(this).html(`<img class="d-inline-block" src="${defaultUserImage}" alt="${profilePhotoAlt}" id="output" />`);
+                                                        var image = document.getElementById("output");
+
+                                                        $(this).fadeIn('slow');
+                                                        inputImage.prop('readonly', false);
+
+                                                        toastr[response.severity](response.body, response.title);
+
+                                                        $(image).click(function () {
+                                                            inputImage.click();
+                                                        });
+                                                    })
+                                                }
+                                            }
+                                        },
+                                        error: function () {
+                                            $('.img-holder').fadeOut(800, function () {
+                                                $(this).html(`<img class="d-inline-block" src="${defaultUserImage}" alt="${profilePhotoAlt}" id="output" />`);
+                                                var image = document.getElementById("output");
+
+                                                $(this).fadeIn('slow');
+                                                inputImage.prop('readonly', false);
+
+                                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+
+                                                $(image).click(function () {
+                                                    inputImage.click();
+                                                });
+                                            })
+                                        }
+                                    })
+
+                                    
+                                });
+                        });
+                    }
+                }
+            });
+
+            function FileExtensionValid(inputImage) {
+                let fileName = $(inputImage).val().split("\\").pop();
+                if (fileName.length && ($.inArray($(inputImage).val().split('.').pop().toLowerCase(), fileExtension) == -1))
+                    return false;
+
+                return true;
+            }
+        })
+    </script>
+}

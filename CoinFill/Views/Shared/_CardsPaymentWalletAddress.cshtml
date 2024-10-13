@@ -1,0 +1,201 @@
+﻿@model CoinFill.PartialViewModels.PaymentWalletAddressPartialViewModel
+
+<div id="payment-wallet-modal"
+     data-toggle="modal"
+     data-keyboard="false"
+     data-backdrop="static"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border p-4 p-sm-5">
+            <div class="modal-header border-bottom-0 py-0 p-0">
+                <h5 class="modal-title text-center mx-auto pr-2">Confirm your external @Model.CryptocurrencyName wallet address from which you made the payment</h5>
+                <button type="button" id="confirm-wallet-times" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <form id="payment-wallet-form" autocomplete="off">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.PaymentId)
+                <div class="modal-body pb-0 px-0">
+                    <div class="form-group">
+                        <label for="WalletAddress">Your @Model.CryptocurrencyName wallet address</label>
+                        <div class="input-group">
+                            <div id="btn-paste" class="input-group-prepend">
+                                <span class="input-group-text text-black" role="button">Paste</span>
+                            </div>
+                            <textarea placeholder="Your @Model.CryptocurrencyName wallet address" id="WalletAddress" asp-for="WalletAddress" class="form-control" cols="2"></textarea>
+                        </div>
+                        <span asp-validation-for="WalletAddress" class="invalid-feedback"></span>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 px-0 pb-0 pt-3">
+                    <button type="button" id="btn-confirm-wallet" class="btn btn-dark btn-block m-0">
+                        <span id="btn-confirm-wallet-text">
+                            <i class="fad fa-check-circle text-success mr-2"></i>Confirm wallet
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script id="script-1-@Model.PaymentId" src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<script id="script-2-@Model.PaymentId"  src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script id="script-3-@Model.PaymentId">
+    $(document).ready(function () {
+        const paymentId = '@Model.PaymentId';
+        const walletAddress = $('#WalletAddress');
+        const btnConfirm = $('#btn-confirm-wallet');
+        const btnConfirmText = btnConfirm.find('span');
+        const btnConfirmTextUnchaned = btnConfirmText.html();
+        const paymentWalletModal = $('#payment-wallet-modal');
+        const confirmWalletTimes = $('#confirm-wallet-times');
+        const paymentForm = $('#payment-wallet-form');
+
+        paymentWalletModal.modal();
+
+        btnConfirm.click(function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            walletAddress.prop('readonly', true);
+            btnConfirm.prop('disabled', true);
+            confirmWalletTimes.prop('disabled', true);
+
+            let height = btnConfirm.height();
+            btnConfirmText.fadeOut('fast', function () {
+                btnConfirmText.html('<div class="spinner mx-auto" style="border-top-color: var(--black);"></div>').fadeIn('slow');
+                btnConfirm.height(height);
+            });
+
+            setTimeout(function () {
+                if (paymentForm.validate().element($(walletAddress))) {
+                    let formData = new FormData(paymentForm.get(0));
+                    formData.append('paymentWalletVm.PaymentId', paymentId);
+                    formData.append('paymentWalletVm.WalletAddress', walletAddress.val());
+
+                    $.ajax({
+                        url: '@Url.Action("SetSenderAddress", "Dashboard", new { Area = "" })',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                btnConfirmText.fadeOut('fast', function () {
+                                    $(this).html('<i class="text-success fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                        setTimeout(function () {
+                                            paymentWalletModal.modal('hide');
+
+                                            walletAddress.prop('readonly', false);
+                                            walletAddress.removeClass('is-valid is-invalid');
+                                            walletAddress.val('');
+                                            btnConfirm.prop('disabled', false);
+                                            btnConfirmText.html(btnConfirmTextUnchaned);
+                                            confirmWalletTimes.prop('disabled', false);
+
+                                            $(`button[data-card-id='${response.cardId}']`).replaceWith(
+                                                '<span class="badge badge-soft-warning">' +
+                                                '<i class="fas fa-stream mr-1"></i>Pending' +
+                                                '</span>'
+                                            )
+
+                                            Swal.fire({
+                                                title: response.title,
+                                                text: response.body,
+                                                icon: response.severity,
+                                                confirmButtonColor: '#00d27a',
+                                                confirmButtonText: 'Alright'
+                                            }).then(() => {
+                                                setTimeout(function () {
+                                                    paymentWalletModal.remove();
+                                                    $('#script-1-' + paymentId).remove();
+                                                    $('#script-2-' + paymentId).remove();
+                                                    $('#script-3-' + paymentId).remove();
+                                                }, 200)
+                                            })
+                                        }, 600);
+                                    });
+                                })
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    btnConfirmText.fadeOut('fast', function () {
+                                        $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[severity](body, title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                btnConfirmText.fadeOut('fast', function () {
+                                                    $(this).html(btnConfirmTextUnchaned).fadeIn('slow');
+                                                    walletAddress.prop('readonly', false);
+                                                    btnConfirm.prop('disabled', false);
+                                                    confirmWalletTimes.prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            btnConfirmText.fadeOut('fast', function () {
+                                $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        btnConfirmText.fadeOut('fast', function () {
+                                            $(this).html(btnConfirmTextUnchaned).fadeIn('slow');
+                                            walletAddress.prop('readonly', false);
+                                            btnConfirm.prop('disabled', false);
+                                            confirmWalletTimes.prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                } else {
+                    btnConfirmText.fadeOut('fast', function () {
+                        $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                        toastr['info']('', 'Fill all the required fields');
+                    })
+                        .promise()
+                        .done(function () {
+                            setTimeout(function () {
+                                btnConfirmText.fadeOut('fast', function () {
+                                    $(this).html(btnConfirmTextUnchaned).fadeIn('slow');
+                                    walletAddress.prop('readonly', false);
+                                    btnConfirm.prop('disabled', false);
+                                    confirmWalletTimes.prop('disabled', false);
+                                });
+                            }, 1300)
+                        })
+                }
+            }, 1200)
+        })
+
+        $('#btn-paste').click(async function () {
+            const text = await navigator.clipboard.readText();
+            walletAddress.val(text);
+        });
+
+        confirmWalletTimes.click(function () {
+            setTimeout(function () {
+                paymentWalletModal.remove();
+                $('#script-1-' + paymentId).remove();
+                $('#script-2-' + paymentId).remove();
+                $('#script-3-' + paymentId).remove();
+            }, 200)
+        })
+    });
+</script>

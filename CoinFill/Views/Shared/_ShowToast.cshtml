@@ -1,0 +1,12 @@
+﻿@{
+    if (ViewBag.toast != null)
+    {
+        var toast = (CoinFill.Helpers.Models.Toast)ViewBag.toast;
+
+        <script>
+            toastr["@toast.Severity"]("@toast.Body", "@toast.Header");
+        </script>
+
+        ViewBag.toast = null;
+    }
+}

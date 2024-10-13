@@ -1,0 +1,337 @@
+﻿@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@using static CoinFill.Helpers.Providers.BankAccountDepositFeeProvider 
+@{
+    ViewData.SetTitle("Bank accounts");
+    ViewData.SetMetaDescription("Easily send cryptocurrencies to your bank accounts and convert them to real money on this page.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #transaction-address:after {
+            content: 'Copy';
+            position: absolute;
+            right: 0;
+            margin-right: 2rem;
+            top: 30% !important;
+        }
+
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fas fa-university",
+        "text-secondary",
+        ViewData.GetTitle() + " - Demo",
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row">
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/EUR.svg" width="24" height="24" alt="EUR" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            EUR Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 5303472689
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @EUR%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: BLZDE4B
+                </div>
+                <div class="text-left">
+                    IBAN: DE79BLZ105172438253435
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/USD.svg" width="24" height="24" alt="USD" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            USD Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 2591816395
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @USD%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    Routing: 234299344
+                </div>
+                <div class="text-left">
+                    Account Number: 79244070
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/GBP.svg" width="24" height="24" alt="GBP" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            GBP Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 9386100274
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @GBP%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: HBUKGB4B
+                </div>
+                <div class="text-left">
+                    IBAN: GB15HBUK40127682057183
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/CAD.svg" width="24" height="24" alt="CAD" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            CAD Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 1026593645
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @CAD%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    Transit: 84055
+                </div>
+                <div class="text-left">
+                    Institution: 621
+                </div>
+                <div class="text-left">
+                    Account Number: 9561922
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/CHF.svg" width="24" height="24" alt="CHF" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            CHF Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 0278419462
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @CHF%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: UNCRCH7A
+                </div>
+                <div class="text-left">
+                    IBAN: CH9300762011623852957
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <button type="button"
+                data-toggle="modal"
+                data-target="#new-bank-currency-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="media flex-center">
+                <div>
+                    <div>
+                        <div class="avatar avatar-2xl">
+                            <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block" src="/images/static/cryptocurrencies/btc.png" alt="Bank" loading="lazy" style="min-width: 2.5rem !important;">
+                        </div>
+                        <i class="far fa-long-arrow-right align-middle text-secondary"></i>
+                        <i class="fas fa-university fa-lg align-middle text-secondary mr-2" style="margin-left: 0.4rem !important;"></i>
+                    </div>
+                    Add bank account
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+<div id="new-bank-currency-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header flex-center border-bottom-0 pb-0">
+                <div>
+                    <h5 class="modal-title text-center mx-auto">Choose the currency of your bank account</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-nowrap">
+                                    <a asp-area="" asp-controller="Demo" asp-action="TransferToPayPal" class="text-500">
+                                        or send by <img src="~/images/static/bank-currencies/paypal.svg" height="24" alt="PayPal" class="mx-1" /> instead
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                @await Component.InvokeAsync("SupportedCurrencies")
+            </div>
+            <div class="modal-footer pt-3 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-cancel-bank-currency" data-dismiss="modal" class="btn btn-falcon-secondary btn-block m-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+}

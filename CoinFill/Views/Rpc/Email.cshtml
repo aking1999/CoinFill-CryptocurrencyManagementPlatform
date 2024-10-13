@@ -1,0 +1,222 @@
+﻿@model CoinFill.ViewModels.RpcEmail
+@{
+    ViewData["Title"] = "Email";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+<div class="row flex-center">
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-header border-bottom-0">
+                <h5 class="mb-0 text-secondary fs-1">Contact us by email</h5>
+            </div>
+            <div class="card-body">
+                <form id="email-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="ToEmail"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                                </div>
+                                <input asp-for="ToEmail"
+                                       class="form-control" />
+                            </div>
+                            <span>
+                                <span asp-validation-for="ToEmail" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="Subject"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                                </div>
+                                <input asp-for="Subject"
+                                       class="form-control" />
+                            </div>
+                            <span>
+                                <span asp-validation-for="Subject" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="InnerEmailHeader"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                                </div>
+                                <textarea asp-for="InnerEmailHeader"
+                                          rows="2"
+                                          class="form-control">
+                                </textarea>
+                            </div>
+                            <span>
+                                <span asp-validation-for="InnerEmailHeader" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label asp-for="Body"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fal fa-bars fa-fw"></i></span>
+                                </div>
+                                <textarea asp-for="Body"
+                                          rows="7"
+                                          class="form-control">
+                                </textarea>
+                            </div>
+                            <span>
+                                <span asp-validation-for="Body" class="invalid-feedback"></span>
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-right">
+                                <button type="button"
+                                        id="btn-submit"
+                                        class="btn btn-sm btn-primary">
+                                    <span id="btn-submit-text">&nbsp;Send&nbsp;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let submit = $('#btn-submit');
+            let submitText = $('#btn-submit-text');
+            let submitTextUnchanged = submitText.html();
+            let emailForm = $('#email-form');
+            let toEmail = $('#ToEmail');
+            let subject = $('#Subject');
+            let header = $('#InnerEmailHeader');
+            let body = $('#Body');
+
+            submit.click(function () {
+                DisableInputs();
+                let width = submit.width();
+                let height = submit.height();
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    submit.width(width);
+                    submit.height(height);
+                })
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        let formData = new FormData(emailForm.get(0));
+                        formData.append('support.ToEmail', toEmail.val());
+                        formData.append('support.Subject', subject.val());
+                        formData.append('support.InnerEmailHeader', header.val());
+                        formData.append('support.Body', body.val());
+
+                        $.ajax({
+                            url: '@Url.Action("Email", "Rpc", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    submitText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            EnableInputs();
+                                            setTimeout(function () {
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleError('An error occurred', 'Please refresh the page and try again.', 'error');
+                            }
+                        })
+                    } else HandleError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function ElementIsValid(element) {
+                return emailForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                const emailValid = ElementIsValid(toEmail);
+                const subjectValid = ElementIsValid(subject);
+                const headerValid = ElementIsValid(header);
+                const bodyValid = ElementIsValid(body);
+
+                return (emailValid && subjectValid &&
+                    headerValid && bodyValid);
+            }
+
+            function EnableInputs() {
+                toEmail.prop('readonly', false);
+                subject.prop('readonly', false);
+                header.prop('readonly', false);
+                body.prop('readonly', false);
+                submit.prop('disabled', false);
+            }
+
+            function DisableInputs() {
+                toEmail.prop('readonly', true);
+                subject.prop('readonly', true);
+                header.prop('readonly', true);
+                body.prop('readonly', true);
+                submit.prop('disabled', true);
+            }
+
+            function HandleError(title, body, severity) {
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title);
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            submitText.fadeOut('fast', function () {
+                                $(this).html(submitTextUnchanged).fadeIn('slow');
+                                EnableInputs();
+                            });
+                        }, 1300)
+                    });
+            }
+        })
+    </script>
+}

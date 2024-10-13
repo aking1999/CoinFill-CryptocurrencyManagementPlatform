@@ -1,0 +1,58 @@
+﻿@model CoinFill.ViewModels.PayPalViewModel
+@using CoinFill.Helpers
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("PayPal transfers");
+    ViewData.SetMetaDescription("Send cryptocurrency to a PayPal account, settling in USD upon arrival.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fab fa-paypal",
+        "text-primary",
+        ViewData.GetTitle() + " - Demo",
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+@section StyleSheets {
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+        <div class="card">
+            <div class="card-body p-4">
+                <form id="paypal-form" autocomplete="off">
+                    <div class="avatar text-center p-2">
+                        <img class="p-0 border-0 d-inline-block" src="/images/static/bank-currencies/paypal.svg" alt="PayPal" loading="lazy">
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PayPalRecipientEmail"></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fal fa-envelope fa-fw"></i></span>
+                            </div>
+                            <input asp-for="PayPalRecipientEmail" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="btn-group-toggle d-flex" data-toggle="buttons">
+                        <label data-demo-account="true" class="btn btn-sm btn-soft-info w-100 mr-1">
+                            <input type="radio" name="options" id="option1"> Goods &amp; Services
+                        </label>
+                        <label data-demo-account="true" class="btn btn-sm btn-soft-info w-100 ml-1">
+                            <input type="radio" name="options" id="option2"> Friends &amp; Family
+                        </label>
+                    </div>
+                    <button data-demo-account="true" type="button" class="btn btn-primary btn-block mt-3">
+                        <span>&nbsp;Request PayPal transfer&nbsp;</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script async src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

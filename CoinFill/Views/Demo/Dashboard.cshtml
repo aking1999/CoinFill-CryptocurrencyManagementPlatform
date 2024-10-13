@@ -1,0 +1,973 @@
+﻿@using CoinFill.Helpers.Extensions
+@using static CoinFill.Helpers.Providers.BankAccountDepositFeeProvider
+@{
+    ViewData.SetTitle("Dashboard");
+    ViewData.SetMetaDescription("Statistics about your crypto cards, bank accounts and stakings.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #address:after,
+        #transaction-address:after {
+            content: 'Copy';
+            position: absolute;
+            right: 0;
+            margin-right: 2rem;
+            top: 30% !important;
+        }
+
+        #address.hover-border-primary:hover,
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/theme.css" />
+}
+
+<!--Card statistics-->
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-analytics fs--1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Demo" asp-action="Cards">Crypto card statistics</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Statistics about crypto card top-ups, spendings and balance.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line text-success"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Card Top-ups<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated according to last week's crypto card top-ups in USD."><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly-top-ups">$2.7K</div>
+                        <span class="badge badge-pill fs--2 badge-soft-success"><i class="far fa-plus mr-1"></i>17.5%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="echart-bar-weekly-card-top-ups h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-danger mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line-down text-danger"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Card Spendings
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly-spending">$1.1K</div>
+                        <span class="badge badge-pill fs--2 badge-soft-danger"><i class="far fa-plus mr-1"></i>7.9%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="echart-line-weekly-card-spending h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-dollar-sign text-success"></span></div>
+                    <h6 class="mb-0">
+                        Total Cards' Balance
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row h-100">
+                    <div class="col align-self-end">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1">$40K</div>
+                        <span class="badge badge-pill fs--2 badge-soft-success"><i class="far fa-plus mr-1"></i>11.6%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="echart-line-total-cards-balance h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <h6 class="mb-0">
+                        Most Used for Top-ups<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated based on the most frequently used cryptocurrencies from last week for topping up crypto card(s)."><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body pt-2 mt-1">
+                <div class="card-img-top mb-1 d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft" style="width: 2.5rem !important; height: 2.5rem !important; background-color: rgb(214, 255, 255) !important;">
+                        <img class="rounded-circle p-0 border-0 d-inline-block mb-1" src="/images/static/cryptocurrencies/usdt.png" loading="lazy" alt="USDT">
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>USDT</span>
+                        <span class="badge badge-pill fs--2" style="color: #009393 !important; background-color: rgb(214, 255, 255) !important; ">
+                            28 transactions
+                        </span>
+                    </div>
+                </div>
+                <div class="card-img-top d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft" style="width: 2.5rem !important; height: 2.5rem !important; background-color: rgb(215, 215, 254) !important;">
+                        <img class="rounded-circle p-0 border-0 d-inline-block mb-1" src="/images/static/cryptocurrencies/apt.png" loading="lazy" alt="APT">
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>APT</span>
+                        <span class="badge badge-pill fs--2" style="color: #030361 !important; background-color: rgb(215, 215, 254) !important;">
+                            26 transactions
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="row flex-between-end">
+                    <div class="col-auto align-self-center">
+                        <h6 class="font-weight-semi-bold text-black mb-0" data-anchor="data-anchor">Monthly card top-ups and spendings</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="echart-bar-line-chart-example" style="min-height: 350px;" data-echart-responsive="true"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/0.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-1">
+                        <img src="~/images/static/card-types-images/visa.png" width="50" height="30" alt="Crypto Visa card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 18300</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            4505 3917 2510 9933
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">04/27</span>
+                            <span class="font-weight-medium">273</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/1.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-0">
+                        <img src="~/images/static/card-types-images/mastercard.png" width="50" height="35" alt="Crypto Mastercard card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 9250</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            5457 4300 0062 5059
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">07/26</span>
+                            <span class="font-weight-medium">580</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/2.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-0">
+                        <img src="~/images/static/card-types-images/americanexpress.png" width="75" height="30" alt="Crypto American Express card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 12500</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            3751 212265 57305
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">02/26</span>
+                            <span class="font-weight-medium">648</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 text-center mb-3">
+        <button type="button"
+                data-toggle="modal"
+                data-target="#card-type-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem !important;">
+            <span class="d-flex flex-center">
+                <i class="fal fa-plus-circle fa-2x mr-2"></i>Create crypto card
+            </span>
+        </button>
+    </div>
+</div>
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-university fs-1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Demo" asp-action="BankAccounts">Bank accounts</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Information about your bank accounts.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/EUR.svg" width="24" height="24" alt="EUR" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            EUR Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 5303472689
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @EUR%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: BLZDE4B
+                </div>
+                <div class="text-left">
+                    IBAN: DE79BLZ105172438253435
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/USD.svg" width="24" height="24" alt="USD" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            USD Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 2591816395
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @USD%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    Routing: 234299344
+                </div>
+                <div class="text-left">
+                    Account Number: 79244070
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/GBP.svg" width="24" height="24" alt="GBP" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            GBP Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 9386100274
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @GBP%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: HBUKGB4B
+                </div>
+                <div class="text-left">
+                    IBAN: GB15HBUK40127682057183
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/CAD.svg" width="24" height="24" alt="CAD" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            CAD Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 1026593645
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @CAD%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    Transit: 84055
+                </div>
+                <div class="text-left">
+                    Institution: 621
+                </div>
+                <div class="text-left">
+                    Account Number: 9561922
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <div class="card card-span"
+             style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="card-body d-flex flex-column">
+                <div class="card-img-top mb-3 d-flex justify-content-start">
+                    <div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">
+                        <i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>
+                        <img src="~/images/static/bank-currencies/CHF.svg" width="24" height="24" alt="CHF" class="ml-n4 mt-4" />
+                    </div>
+                    <span class="ml-3 text-left">
+                        <span class="font-weight-semi-bold text-black">
+                            CHF Bank Account
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Bank ID: 0278419462
+                        </span>
+                        <br />
+                        <span class="fs--1">
+                            Deposit fee: @CHF%
+                        </span>
+                    </span>
+                    <div class="ml-auto">
+                        <span class="badge badge-soft-success">
+                            <i class="fas fa-check-circle mr-1"></i>Active
+                        </span>
+                    </div>
+                </div>
+                <div class="text-left text-black">
+                    Leonard Cooper
+                </div>
+                <div class="text-left">
+                    BIC/SWIFT: UNCRCH7A
+                </div>
+                <div class="text-left">
+                    IBAN: CH9300762011623852957
+                </div>
+                <button data-demo-account="true" class="btn btn-soft-info btn-block mt-auto">
+                    <span>&nbsp;Deposit cryptocurrencies&nbsp;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">
+        <button type="button"
+                data-toggle="modal"
+                data-target="#new-bank-currency-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">
+            <div class="media flex-center">
+                <div>
+                    <div>
+                        <div class="avatar avatar-2xl">
+                            <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block" src="/images/static/cryptocurrencies/btc.png" loading="lazy" style="min-width: 2.5rem !important;">
+                        </div>
+                        <i class="far fa-long-arrow-right align-middle text-secondary"></i>
+                        <i class="fas fa-university fa-lg align-middle text-secondary mr-2" style="margin-left: 0.4rem !important;"></i>
+                    </div>
+                    Add bank account
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+<!--Staking statistics-->
+
+<div class="d-flex my-3">
+    <div class="text-center d-flex flex-center rounded-pill d-inline-block"
+         data-toggle="set-color-and-background-color"
+         data-color="#34a4ff"
+         style="width: 2rem !important; height: 2rem !important;">
+        <i class="far fa-analytics fs--1 align-bottom"></i>
+    </div>
+    <div class="col">
+        <h5 class="mb-0 text-primary position-relative">
+            <span class="bg-200 pr-3"><a class="text-decoration-none" asp-controller="Demo" asp-action="Staking">Staking statistics</a></span>
+            <span class="border position-absolute top-50 translate-middle-y w-100 start-0 z-index--1"></span>
+        </h5>
+        <p class="fs--1 mb-0">Statistics about staking rewards, allocation and performance.</p>
+    </div>
+</div>
+
+<div class="row no-gutters">
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-chart-line text-success"></span></div>
+                    <h6 class="mb-0">
+                        Weekly Staking Rewards<span class="ml-1 text-400" data-toggle="tooltip" data-placement="bottom" title="Calculated according to last week's staking rewards in USD"><span class="far fa-question-circle" data-fa-transform="shrink-1"></span></span>
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-end">
+                <div class="row flex-grow-1">
+                    <div class="col">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1" id="total-weekly">$8.2K</div>
+                        <span class="badge badge-pill fs--2 badge-soft-success"><i class="far fa-plus mr-1"></i>17.5%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="echart-bar-weekly-sales h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2 pr-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-primary mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-layer-group text-primary"></span></div>
+                    <h6 class="mb-0">
+                        Total Staking Rewards
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row h-100">
+                    <div class="col align-self-end">
+                        <div class="fs-4 font-weight-normal text-sans-serif text-700 line-height-1 mb-1">$53K</div>
+                        <span class="badge badge-pill fs--2 badge-soft-success"><i class="far fa-plus mr-1"></i>11.6%</span>
+                    </div>
+                    <div class="col-auto pl-0">
+                        <div class="echart-line-total-order h-100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pr-md-2 pl-xxl-2">
+        <div class="card h-md-100">
+            <div class="card-body">
+                <div class="row h-100 justify-content-between no-gutters">
+                    <div class="col-5 col-sm-6 col-xxl pr-2">
+                        <div class="mb-0 mt-2 d-flex align-items-center">
+                            <div class="icon-item icon-item-sm shadow-none me-2 bg-soft-primary mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-percentage text-primary"></span></div>
+                            <h6 class="mb-0">
+                                Allocation
+                            </h6>
+                        </div>
+                        <div class="fs--2 mt-3">
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: #f7931a !important;"></span><span class="font-weight-semi-bold">1. BTC</span></div>
+                                <div class="d-xxl-none">60.23%</div>
+                            </div>
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: #2ba0ff !important;"></span><span class="font-weight-semi-bold">2. USDC</span></div>
+                                <div class="d-xxl-none">21.59%</div>
+                            </div>
+                            <div class="d-flex flex-between-center mb-1">
+                                <div class="d-flex align-items-center"><span class="dot" style="background-color: #b6c1d2 !important;"></span><span class="font-weight-semi-bold">3. Other</span></div>
+                                <div class="d-xxl-none">18.18%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="echart-doughnut"></div>
+                        <div class="absolute-centered font-weight-medium text-dark fs-2" style="top: 45% !important;">$88K</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xxl-3 mb-3 pl-md-2">
+        <div class="card h-md-100">
+            <div class="card-header pb-0">
+                <div class="mb-0 mt-2 d-flex align-items-center">
+                    @*<div class="icon-item icon-item-sm shadow-none me-2 bg-soft-success mr-2" style="border-radius: 0.35rem !important;"><span class="fas fa-long-arrow-alt-up text-success"></span></div>*@
+                    <h6 class="mb-0">
+                        Top Performers
+                    </h6>
+                </div>
+            </div>
+            <div class="card-body pt-2 mt-1">
+                <div class="card-img-top mb-1 d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft" style="width: 2.5rem !important; height: 2.5rem !important; background-color: rgb(230, 215, 254) !important;">
+                        <img class="rounded-circle p-0 border-0 d-inline-block mb-1" src="/images/static/cryptocurrencies/tia.png" loading="lazy" alt="TIA">
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>TIA</span>
+                        <span class="badge badge-pill fs--2" style="color: #7a2bf9 !important; background-color: rgb(230, 215, 254) !important;">
+                            <i class="far fa-plus mr-1"></i>34.01%
+                        </span>
+                    </div>
+                </div>
+                <div class="card-img-top d-flex justify-content-start" style="user-select: none;">
+                    <div class="avatar avatar-2xl text-center p-2 rounded-soft" style="width: 2.5rem !important; height: 2.5rem !important; background-color: rgb(214, 242, 255) !important;">
+                        <img class="rounded-circle p-0 border-0 d-inline-block mb-1" src="/images/static/cryptocurrencies/inj.png" loading="lazy" alt="INJ">
+                    </div>
+                    <div class="ml-2 font-weight-medium d-flex align-items-center justify-content-between" style="font-size: 0.9rem !important; width: 79% !important;">
+                        <span>INJ</span>
+                        <span class="badge badge-pill fs--2" style="color: #00a8fb !important; background-color: rgb(214, 242, 255) !important;">
+                            <i class="far fa-plus mr-1"></i>32.90%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+
+<div id="card-type-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose your prefered card type</h5>
+                <button id="card-type-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body px-4 pb-5 pt-sm-1 px-sm-5">
+                <div class="row">
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="cf-icon-virtual-card fa-3x text-primary"></i>
+                            Virtual crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $15000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">The card is available immediately after payment verification</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price: 49$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="virtual-card" data-demo-account="true" data-card-type="virtual" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your virtual crypto card</span>
+                        </button>
+                    </div>
+                    <div class="col-md-2 d-none d-lg-flex justify-content-center">
+                        <div class="border-dotted-left-4 d-none d-sm-block"></div>
+                    </div>
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="fal fa-credit-card fa-2x text-primary mr-2"></i>
+                            Physical crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $15000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Shipping to
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-countries-modal">@Model supported countries</button>;
+                                                        arrives in 5-7 business days
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price + shipping: 149$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="physical-card" data-demo-account="true" data-card-type="physical" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your physical crypto card</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="new-bank-currency-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header flex-center border-bottom-0 pb-0">
+                <div>
+                    <h5 class="modal-title text-center mx-auto">Choose the currency of your bank account</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-nowrap">
+                                    <a asp-area="" asp-controller="Demo" asp-action="TransferToPayPal" class="text-500">
+                                        or send by <img src="~/images/static/bank-currencies/paypal.svg" height="24" alt="PayPal" class="mx-1" /> instead
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                @await Component.InvokeAsync("SupportedCurrencies")
+            </div>
+            <div class="modal-footer pt-3 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-cancel-bank-currency" data-dismiss="modal" class="btn btn-falcon-secondary btn-block m-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCryptocurrencies.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCountries.cshtml")
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="~/js/dayjs.min.js"></script>
+    <script src="~/js/charts/echarts.min.js"></script>
+    @*<script src="~/js/charts/chart-setup.js"></script>*@
+    <script src="~/js/charts/echarts-double-bar-demo.js"></script>
+    <script src="~/js/charts/chart-weekly-card-top-ups-demo-setup.js"></script>
+    <script src="~/js/charts/chart-weekly-staking-rewards-demo-setup.js"></script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=window.scroll"></script>
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+}

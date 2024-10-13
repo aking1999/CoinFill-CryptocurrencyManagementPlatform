@@ -1,0 +1,138 @@
+﻿@model CoinFill.ViewModels.SignInViewModel
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Sign in");
+    ViewData.SetMetaDescription("Skyrocket your wealth with all the crypto possibilities that CoinFill offers.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row flex-center no-gutters" style="min-height: 70vh !important;">
+    <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+        <a asp-controller="Home" asp-action="Index" class="d-flex flex-center text-decoration-none"><span class="font-weight-medium fs-5 d-inline-block">C<i class="far align-middle fa-usd-circle text-primary" style="font-size: 0.68em !important;"></i>inFill</span></a>
+        <h2 class="fs-1 mt-3 mb-4 mb-0 text-black text-center">
+            Cryptocurrency management made easy
+        </h2>
+        <div class="card">
+            <div class="card-body p-4 p-sm-5">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="row text-left justify-content-between align-items-center mb-2">
+                    <div class="col-auto">
+                        <h5>Sign in</h5>
+                    </div>
+                    <div class="col-auto">
+                        <p class="fs--1 text-600 mb-0">or <a asp-controller="Authorization" asp-action="Register">Create an account</a></p>
+                    </div>
+                </div>
+                <form id="sign-in-form" asp-area="" asp-controller="Authorization" asp-action="SignIn" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="invalid-feedback"></span>
+                    </div>
+                    <div class="form-group">
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="invalid-feedback"></span>
+                    </div>
+                    <div class="text-center">
+                        <a class="fs--1" asp-controller="Authorization" asp-action="ForgotPassword">Forgot password?</a>
+                    </div>
+                    <div class="form-group mb-0">
+                        <button id="btn-submit" class="btn btn-primary btn-block mt-3" type="button">
+                            <span id="btn-submit-text">&nbsp;Sign in&nbsp;</span>
+                        </button>
+                    </div>
+                </form>
+                @*<div class="w-100 position-relative mt-4">
+                    <hr class="text-300" />
+                    <div class="position-absolute absolute-centered t-0 px-3 bg-white fs--1 text-500 text-nowrap">or sign in with</div>
+                </div>
+                <div class="form-group mb-0">
+                    <div class="row no-gutters">
+                        <div class="col-sm-12">
+                            <a class="btn btn-falcon-secondary btn-sm btn-block mt-2" href="#">
+                                <img src="~/images/static/assets/google.svg" />
+                            </a>
+                        </div>
+                    </div>
+                </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('footer').remove();
+            $('main').removeClass('pb-3');
+            let submit = $('#btn-submit');
+            let submitText = $('#btn-submit-text');
+            let submitTextUnchanged = submitText.html();
+            let email = $('#Email');
+            let password = $('#Password');
+            let signInForm = $('#sign-in-form');
+
+            submit.click(function (e) {
+                e.preventDefault();
+                DisableInputs();
+                let height = $(this).height();
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    submit.height(height);
+                })
+
+                setTimeout(function () {
+                    if (FormIsValid()) {
+                        submitText.fadeOut('fast', function () {
+                            $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                setTimeout(function () {
+                                    signInForm.submit();
+                                }, 600);
+                            });
+                        })
+                    } else HandleError('Fill all the required fields', '', 'info')
+                }, 600)
+            })
+
+            function ElementIsValid(element) {
+                return signInForm.validate().element($(element));
+            }
+
+            function FormIsValid() {
+                const emailValid = ElementIsValid(email);
+                const passwordValid = ElementIsValid(password);
+
+                return (emailValid && passwordValid);
+            }
+
+            function EnableInputs() {
+                submit.prop('disabled', false);
+                email.prop('readonly', false);
+                password.prop('readonly', false);
+            }
+
+            function DisableInputs() {
+                submit.prop('disabled', true);
+                email.prop('readonly', true);
+                password.prop('readonly', true);
+            }
+
+            function HandleError(title, body, severity) {
+                submitText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            submitText.fadeOut('fast', function () {
+                                $(this).html(submitTextUnchanged).fadeIn('slow');
+                                EnableInputs();
+                            });
+                        }, 600)
+                    })
+            }
+        })
+    </script>
+}

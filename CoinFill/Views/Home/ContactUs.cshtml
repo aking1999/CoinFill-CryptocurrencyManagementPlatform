@@ -1,0 +1,129 @@
+﻿@using static CoinFill.Helpers.Providers.CustomerSupportTicketTopicsProvider
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Contact Us");
+    ViewData.SetMetaDescription("Easily contact our sales, support and marketing departments. Also send us your questions and we would love to answer them.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .line-before:before {
+            display: block;
+            position: absolute;
+            width: 0.1rem;
+            height: 1rem;
+            background-color: var(--primary) !important;
+            content: '';
+            margin-left: -1rem !important;
+            top: 3px;
+        }
+    </style>
+}
+
+<div class="row flex-center py-5 py-md-6 py-lg-8">
+    <div class="col-12 pl-3">
+        <h1 class="text-black">Contact us</h1>
+    </div>
+    <div class="col-12 mb-4 pl-3">
+        <h5 class="text-secondary">Get in touch and let us know how we can help. You'll get a response within a couple of hours.</h5>
+    </div>
+    <div class="col-12 col-lg-4 mb-4 pb-3">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="card-img-top mb-4 d-flex justify-content-start" style="user-select: none;">
+                    <div class="text-center d-flex flex-center p-2 rounded-soft"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:3.7rem!important;height:3.7rem!important;">
+                        <i class="fal fa-building fs-3"></i>
+                    </div>
+                    <div class="ml-3 text-black d-flex flex-center fs-1 font-weight-semi-bold">
+                        Sales
+                    </div>
+                </div>
+                <p class="fs-0 mb-4">
+                    We'd love to talk about how we can work together.
+                </p>
+                <a href="@Url.Action("CustomerSupport", "Home", new { topic = Sales.Id })" class="btn btn-sm btn-primary rounded-pill text-decoration-none">
+                    Contact sales agent
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4 mb-4 pb-3">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="card-img-top mb-4 d-flex justify-content-start" style="user-select: none;">
+                    <div class="text-center d-flex flex-center p-2 rounded-soft"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:3.7rem!important;height:3.7rem!important;">
+                        <i class="fal fa-comments fs-3"></i>
+                    </div>
+                    <div class="ml-3 text-black d-flex flex-center fs-1 font-weight-semi-bold">
+                        Help & support
+                    </div>
+                </div>
+                <p class="fs-0 mb-4">
+                    Get in touch and let us know how we can help.
+                </p>
+                <a href="@Url.Action("CustomerSupport", "Home", new { topic = Support.Id })" class="btn btn-sm btn-primary rounded-pill text-decoration-none">
+                    Contact support agent
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4 mb-4 pb-3">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="card-img-top mb-4 d-flex justify-content-start" style="user-select: none;">
+                    <div class="text-center d-flex flex-center p-2 rounded-soft"
+                         data-toggle="set-color-and-background-color"
+                         data-color="#2ba0ff"
+                         style="width:3.7rem!important;height:3.7rem!important;">
+                        <i class="fal fa-newspaper fs-3"></i>
+                    </div>
+                    <div class="ml-3 text-black d-flex flex-center fs-1 font-weight-semi-bold">
+                        Media & Press
+                    </div>
+                </div>
+                <p class="fs-0 mb-4">
+                    Contact us and get CoinFill news, company info, and media resources.
+                </p>
+                <a href="@Url.Action("CustomerSupport", "Home", new { topic = Marketing.Id })" class="btn btn-sm btn-primary rounded-pill text-decoration-none">
+                    Contact marketing agent
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="line-before col-12 col-md-6 d-flex flex-column align-self-start mb-5 mb-md-0" style="padding-left: 1.5rem !important">
+        <p class="text-black">Follow us on social media</p>
+        <div class="d-flex align-items-center">
+            <a onclick="toastr['info']('', 'Our Instagram account will be added soon')" class="instagram avatar avatar-l">
+                <img src="~/images/static/assets/instagram.svg" alt="instagram" />
+            </a>
+            <a href="https://www.tiktok.com/@@coinfill.io" rel="noreferrer nofollow" class="tiktok avatar avatar-xl mx-3">
+                <img src="~/images/static/assets/tiktok.svg" alt="tiktok" />
+            </a>
+            <a href="#" onclick="toastr['info']('', 'Our X account will be added soon')" class="twitter avatar avatar-m">
+                <img src="~/images/static/assets/x-twitter.svg" alt="twitter" />
+            </a>
+        </div>
+    </div>
+    <div class="line-before col-12 col-md-6 d-flex flex-column align-self-start" style="padding-left: 1.5rem !important">
+        <p class="text-black">General communications</p>
+        <p class="text-secondary">
+            For general queries, including partnership opportunities, please
+            <a href="@Url.Action("CustomerSupport", "Home", new { topic = Support.Id })">contact support for help</a>.
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+}

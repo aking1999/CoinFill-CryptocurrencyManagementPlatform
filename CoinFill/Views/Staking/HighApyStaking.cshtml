@@ -1,0 +1,511 @@
+﻿@model CoinFill.ViewModels.StakingViewModel
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("High Apy Staking");
+    ViewData.SetMetaDescription("Experience Unmatched Returns with an Astonishing 68% Crypto Staking APY · Your Gateway to Financial Freedom Awaits!");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string demoAccount = User.Identity.IsAuthenticated ? $"href='{Url.Action("Index", "Staking", new { Area = "" })}'" : "data-demo-account='true'";
+}
+
+@section StyleSheets {
+    <style id="border-rule">
+        .staking-img-container {
+            border-top-color: transparent !important;
+        }
+    </style>
+    <style id="staking-rules">
+        .staking-img {
+            color: black;
+            transition: 0.5s linear;
+        }
+
+        .staking-img-container {
+            animation: stake-spin 1s linear infinite;
+            transition: 0.5s linear;
+        }
+
+        .staking-img-self {
+            animation: stake-spin-reverse 1s linear infinite;
+        }
+
+        @@keyframes stake-spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes stake-spin-reverse {
+            from {
+                transform: rotate(360deg);
+            }
+
+            to {
+                transform: rotate(0deg);
+            }
+        }
+    </style>
+    <style>
+        :root {
+            --transition: 0.25s;
+            --spark: 1.8s;
+        }
+
+        .badge-soft-success {
+            color: #00864e !important;
+            background-color: #ccf6e4 !important;
+        }
+
+        .staking-fadein {
+            opacity: 0;
+            animation-name: fadeInStaking;
+            animation-duration: 0.6s;
+            animation-iteration-count: 1;
+            animation-fill-mode: forwards;
+        }
+
+            .staking-fadein:nth-child(1),
+            .staking-fadein:nth-child(2) {
+                animation-delay: 1.6s;
+            }
+
+            .staking-fadein:nth-child(3),
+            .staking-fadein:nth-child(4) {
+                animation-delay: 1.9s;
+            }
+
+            .staking-fadein:nth-child(5),
+            .staking-fadein:nth-child(6) {
+                animation-delay: 2.2s;
+            }
+
+            .staking-fadein:nth-child(7),
+            .staking-fadein:nth-child(8) {
+                animation-delay: 2.5s;
+            }
+
+            .staking-fadein:nth-child(9),
+            .staking-fadein:nth-child(10) {
+                animation-delay: 2.8s;
+            }
+
+            .staking-fadein:nth-child(11),
+            .staking-fadein:nth-child(12) {
+                animation-delay: 3.1s;
+            }
+
+            .staking-fadein:nth-child(13),
+            .staking-fadein:nth-child(14) {
+                animation-delay: 3.4s;
+            }
+
+        @@keyframes fadeInStaking {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .svg-spark {
+            width: 1.2rem;
+            height: 1.5rem;
+            overflow: hidden !important;
+            visibility: visible;
+        }
+
+        .sparkle-spark path {
+            color: hsl(0 0% calc((var(--active, 0) * 70%) + var(--base)));
+            transform-box: fill-box;
+            transform-origin: center;
+            fill: #6b22fc;
+            stroke: #6b22fc;
+            animation-delay: calc((var(--transition) * 1.5) + (var(--delay) * 1s));
+            animation-duration: 0.7s;
+            animation-iteration-count: infinite;
+            transition: color var(--transition);
+            animation-name: bounce-spark;
+        }
+
+        @@keyframes bounce-spark {
+            35%, 65% {
+                scale: var(--scale);
+            }
+        }
+
+        .sparkle-spark path:nth-of-type(1) {
+            --scale: 0.5;
+            --delay: 0.1;
+            --base: 40%;
+        }
+
+        .sparkle-spark path:nth-of-type(2) {
+            --scale: 1.5;
+            --delay: 0.2;
+            --base: 20%;
+        }
+
+        .sparkle-spark path:nth-of-type(3) {
+            --scale: 2.5;
+            --delay: 0.35;
+            --base: 30%;
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/rocket.css" />
+    <link rel="stylesheet" href="~/css/btn-send-paper-plane.css" />
+}
+
+<section id="hero" class="pb-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 align-self-center text-center text-md-left pb-0 pb-md-8" style="z-index: 2 !important;">
+                <h1 class="text-black mt-3 mt-md-0 fs-4 fs-md-5 no-tick font-weight-medium">
+                    Skyrocket <span class="fs-3 fs-md-4">🚀</span> Your Wealth with Unrivaled Crypto Staking APY
+                </h1>
+                <h2 class="fs-1 mt-4 py-3 mb-1 mb-0 text-900 text-center text-md-left font-weight-semi-bold">
+                    Experience Unmatched Returns with an
+                    <span class="text-nowrap">
+                        <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span style="color: #6b22fc !important;">Astonishing 82% APY</span>
+                        <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                    <br />
+                    <br />
+                    Stake Smart, Earn Big – Your Gateway to Financial Freedom Awaits!
+                </h2>
+                <br />
+                <a id="stake-now" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 mr-2 fs-0 rounded-pill scrollto font-weight-medium" style="padding: 0.875rem 1.75rem !important; line-height: 19px !important;">
+                    Stake Now
+                </a>
+                <a asp-controller="Demo" asp-action="Staking" class="rocket-button btn text-decoration-none mb-5 mb-sm-5 mb-md-2 mb-lg-0">
+                    <div class="default">Launch Demo</div>
+                    <div class="success">
+                        <svg>
+                            <use xlink:href="#check" />
+                        </svg>
+                        <div>LETS GO!</div>
+                    </div>
+                    <div class="animation">
+                        <div class="rocket">
+                            <svg>
+                                <use xlink:href="#rocket" />
+                            </svg>
+                        </div>
+                        <div class="smoke">
+                            <i></i><i></i><i></i><i></i><i></i><i></i>
+                        </div>
+                    </div>
+                </a>
+
+                <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 11" id="check">
+                        <polyline stroke="currentColor" points="1 5.5 5 9.5 12 1.5"></polyline>
+                    </symbol>
+                    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" id="rocket">
+                        <path d="M12,0 C18.6666667,8.70175439 19.7777778,19.0350877 15.3333333,31 L8.66666667,31 C4.22222222,19.0350877 5.33333333,8.70175439 12,0 Z" fill="var(--rocket)"></path>
+                        <path d="M12,0 C5.33333333,8.70175439 4.22222222,19.0350877 8.66666667,31 C6.72222222,17.9473684 7.83333333,7.61403509 12,0 Z" fill="var(--rocket-shadow-left)"></path>
+                        <path d="M12,0 C18.6666667,8.70175439 19.7777778,19.0350877 15.3333333,31 C17.2777778,17.9473684 16.1666667,7.61403509 12,0 Z" fill="var(--rocket-shadow-right)"></path>
+                        <path d="M22.2399372,27.25 C21.2403105,25.558628 19.4303122,23.808628 16.21,22 L15,31 L17.6512944,31 C18.2564684,31 18.8216022,31.042427 19.1572924,31.5292747 L21.7379379,35.271956 C22.0515593,35.7267976 22.5795404,36 23.1449294,36 C23.5649145,36 23.9142153,35.7073938 23.9866527,35.3215275 L24,35.146217 L23.9987214,35.1196135 C23.7534506,31.4421183 23.1671892,28.8189138 22.2399372,27.25 Z" fill="var(--rocket-wing-right)"></path>
+                        <path d="M1.76006278,27.25 C2.75968951,25.558628 4.56968777,23.808628 7.79,22 L9,31 L6.34870559,31 C5.74353157,31 5.17839777,31.042427 4.84270762,31.5292747 L2.2620621,35.271956 C1.94844071,35.7267976 1.42045963,36 0.855070627,36 C0.435085457,36 0.0857846604,35.7073938 0.0133472633,35.3215275 L0,35.146217 L0.00127855763,35.1196135 C0.24654935,31.4421183 0.832810758,28.8189138 1.76006278,27.25 Z" fill="var(--rocket-wing-left)"></path>
+                        <circle fill="var(--rocket-window-shadow)" cx="12" cy="12" r="3"></circle>
+                        <circle fill="var(--rocket-window)" cx="12" cy="12" r="2.5"></circle>
+                        <path d="M15.6021597,5.99977504 L8.39784027,5.99977504 C8.54788101,5.6643422 8.70496315,5.3309773 8.86908669,4.99968036 L15.1309133,4.99968036 C15.2950369,5.3309773 15.452119,5.6643422 15.6021597,5.99977504 Z" fill-opacity="0.3" fill="var(--rocket-line)"></path>
+                    </symbol>
+                </svg>
+            </div>
+            <div class="col-12 col-md-6 align-self-center pb-5 pb-md-8" style="user-select: none !important; overflow-x: hidden !important;">
+                <div id="stakings-holder" class="row no-gutters">
+                    <div class="col-12 offset-2 offset-md-2 offset-lg-3 offset-xl-4 d-flex align-items-center justify-content-md-start mb-4">
+                        <div class="avatar" style="width:4.125rem;height:4.125rem;">
+                            <img class="rounded-circle img-thumbnail shadow-sm border-0 d-inline-block"
+                                 src="/images/static/users/cardholder-leonard-cooper.png"
+                                 alt="Leonard Cooper"
+                                 style="min-width: 3.5rem !important;">
+                        </div>
+                        <div class="text-black font-weight-normal ml-3">
+                            Leonard Cooper
+                            <div class="fs--1 font-weight-semi-bold">
+                                Staking Portfolio:
+                                <i id="portfolio-arrow" class="fas fa-long-arrow-alt-up text-success ml-1 d-inline" style="visibility: visible; opacity: 0;"></i>
+                                <span class="text-black font-weight-semi-bold" id="portfolio">
+                                    $ 346758
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="sol-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/sol.png"
+                                 alt="SOL">
+                        </div>
+                        <span id="sol-amount" class="text-black ml-1">42 SOL</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="sol-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 17 SOL</span>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="dai-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/dai.png"
+                                 alt="DAI">
+                        </div>
+                        <span id="dai-amount" class="text-black ml-1">530 DAI</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="dai-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 78 DAI</span>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="tia-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/tia.png"
+                                 alt="TIA">
+                        </div>
+                        <span id="tia-amount" class="text-black ml-1">180 TIA</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="tia-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 44 TIA</span>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="dot-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/dot.png"
+                                 alt="DOT">
+                        </div>
+                        <span id="dot-amount" class="text-black ml-1">270 DOT</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="dot-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 12 DOT</span>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="apt-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/apt.png"
+                                 alt="APT">
+                        </div>
+                        <span id="apt-amount" class="text-black ml-1">350 APT</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="apt-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 52 APT</span>
+                    </div>
+                    <div class="col-5 col-sm-3 col-md-5 col-lg-4 col-xl-3 offset-3 offset-sm-4 offset-md-3 offset-lg-4 offset-xl-5 staking-fadein mb-2">
+                        <div id="op-staking" class="avatar avatar-2xl text-center rounded-circle staking-img-container"
+                             style="width: 2.2rem !important; height: 2.2rem !important; background-color: transparent !important; border: 2px solid transparent;">
+                            <img class="rounded-circle border-0 d-inline-block staking-img staking-img-self"
+                                 style="padding: 2px !important;"
+                                 src="/images/static/cryptocurrencies/op.png"
+                                 alt="OP">
+                        </div>
+                        <span id="op-amount" class="text-black ml-1">230 OP</span>
+                    </div>
+                    <div class="col-4 col-sm-4 col-lg-4 staking-fadein font-weight-medium mt-1">
+                        <span id="op-amount-to-add" class="badge badge-soft-success badge-pill" style="display: none;">+ 33 OP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-0">
+    <div class="container container-fluid">
+        <div id="cryptos-holder" class="row">
+            @foreach (var cryptocurrency in Model.Cryptocurrencies)
+            {
+                int i = 1;
+                <div class="col-6 col-sm-4 col-md-3 col-xl-2 mb-3 scroll-@cryptocurrency.CryptocurrencyId">
+                    <div class="card h-100 card-span border">
+                        <div class="card-body pb-3 d-flex flex-column">
+                            <div class="card-img-top mb-3 d-flex justify-content-start" style="user-select: none;">
+                                <div class="avatar avatar-2xl text-center p-2 rounded-soft"
+                                     data-toggle="set-color-and-background-color"
+                                     data-color="@cryptocurrency.CryptocurrencyColor"
+                                     style="width:2.7rem!important;height:2.7rem!important;">
+                                    <img class="rounded-circle p-0 border-0 d-inline-block"
+                                         src="~/images/static/cryptocurrencies/@cryptocurrency.CryptocurrencyIcon"
+                                         loading="lazy"
+                                         alt="@cryptocurrency.CryptocurrencyName" />
+                                </div>
+                                <div class="ml-2 text-black d-flex flex-center font-weight-medium" style="font-size: 0.9rem !important;">
+                                    @cryptocurrency.CryptocurrencyName
+                                </div>
+                            </div>
+                            <span class="badge badge-soft-primary mb-3">
+                                Up to @cryptocurrency.MaxApy% APY
+                            </span>
+                            <div class="d-flex flex-column">
+                                <p class="fs--1 mt-auto mb-1 text-muted">Validators</p>
+                                <div class="avatar-group" style="user-select: none;">
+                                    @foreach (var validator in cryptocurrency.Validators)
+                                    {
+                                        <div class="avatar avatar-xl mr-n3"
+                                             data-toggle="popover"
+                                             data-placement="bottom"
+                                             data-html="true"
+                                             data-content="<div class='d-flex'><div class='justify-content-start avatar avatar-xl'><img class='rounded-circle d-inline-block' style='border: 2px solid white !important;' src='/images/validators/@validator.Photo' /></div><span class='ml-2 fa--1 d-flex align-items-center font-weight-semi-bold text-black'>@validator.Name<i class='fas fa-badge-check text-primary ml-1'></i></span></div>">
+                                            <img style="border: 2px solid white !important;"
+                                                 class="rounded-circle"
+                                                 src="~/images/validators/@validator.Photo"
+                                                 alt="Validator @validator.Name"
+                                                 loading="lazy" />
+                                        </div>
+                                        if (cryptocurrency.Validators.Count > 3 && i >= 3)
+                                        {
+                                            <div class="mr-n3 d-inline-block">
+                                                <div class="avatar avatar-xl">
+                                                    <span style="border: 2px solid white !important;" class="avatar-name rounded-circle">
+                                                        <span>+@(cryptocurrency.Validators.Count - 3)</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            break;
+                                        }
+                                        i++;
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer border-dashed-top">
+                            <a data-crypto-id="@cryptocurrency.CryptocurrencyId" @Html.Raw(demoAccount) class="btn-stake-coin btn btn-sm btn-soft-primary btn-block">
+                                <span>
+                                    Stake @cryptocurrency.CryptocurrencyName
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<section id="subscription-holder" class="pt-0 pt-4 pb-0">
+    <div class="container container-fluid">
+        <div class="row justify-content-center mb-3">
+            <div class="col-sm-10 col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-body overflow-hidden p-4 p-sm-5">
+                        <img class="d-block mx-auto mb-4" src="~/images/static/assets/newsletter.png" height="104" width="96" alt="envelope" />
+                        <h2 class="text-center h3 mb-3 text-900">
+                            Subscribe to our Newsletter & get
+                            <br />
+                            <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <span style="color: #6b22fc !important;">Exclusive Rewards</span>
+                            <svg class="sparkle-spark svg-spark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.187 8.096L15 5.25L15.813 8.096C16.0231 8.83114 16.4171 9.50062 16.9577 10.0413C17.4984 10.5819 18.1679 10.9759 18.903 11.186L21.75 12L18.904 12.813C18.1689 13.0231 17.4994 13.4171 16.9587 13.9577C16.4181 14.4984 16.0241 15.1679 15.814 15.903L15 18.75L14.187 15.904C13.9769 15.1689 13.5829 14.4994 13.0423 13.9587C12.5016 13.4181 11.8321 13.0241 11.097 12.814L8.25 12L11.096 11.187C11.8311 10.9769 12.5006 10.5829 13.0413 10.0423C13.5819 9.50162 13.9759 8.83214 14.186 8.097L14.187 8.096Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6 14.25L5.741 15.285C5.59267 15.8785 5.28579 16.4206 4.85319 16.8532C4.42059 17.2858 3.87853 17.5927 3.285 17.741L2.25 18L3.285 18.259C3.87853 18.4073 4.42059 18.7142 4.85319 19.1468C5.28579 19.5794 5.59267 20.1215 5.741 20.715L6 21.75L6.259 20.715C6.40725 20.1216 6.71398 19.5796 7.14639 19.147C7.5788 18.7144 8.12065 18.4075 8.714 18.259L9.75 18L8.714 17.741C8.12065 17.5925 7.5788 17.2856 7.14639 16.853C6.71398 16.4204 6.40725 15.8784 6.259 15.285L6 14.25Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z" fill="#6b22fc" stroke="#6b22fc" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </h2>
+                        <p class="text-center fs--1">
+                            Stay updated by email with the latest crypto news, promotions, lucrative rewards,
+                            functionalities, and more information from CoinFill.
+                        </p>
+                        <form id="newsletter-join-form" autocomplete="off">
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input asp-for="Newsletter.Email"
+                                           class="form-control mr-2"
+                                           style="border-top-right-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important;" />
+                                    <span class="input-group-btn">
+                                        <button id="newsletter-join" type="button" class="button">
+                                            <span class="default">Subscribe</span>
+                                            <span class="success text-secondary"><i class="fas fa-check text-success mr-2 no-tick"></i>Done</span>
+                                            <div class="left"></div>
+                                            <div class="right"></div>
+                                        </button>
+                                    </span>
+                                </div>
+                                <span>
+                                    <span asp-validation-for="Newsletter.Email" class="invalid-feedback"></span>
+                                    <br />
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-10 col-md-8 col-lg-6">
+                <div class="alert alert-info mb-0 text-center" role="alert">
+                    Have questions? <a asp-controller="Home" asp-action="ContactUs" target="_blank" class="text-decoration-none">Contact us</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/countUp.umd.js"></script>
+    <script src="~/js/high-apy-staking.js"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            $(document).ready(function () {
+                $('.btn-stake-coin').click(function () {
+                    sessionStorage.setItem('choosenstakeclick', $(this).attr('data-crypto-id'));
+                })
+            })
+        </script>
+    }
+    <script>
+        $(document).ready(function () {
+            if (localStorage.getItem('exclusiveOfferAppearedOnce') === null) {
+                setTimeout(function () {
+                    $('.modal').modal('hide');
+                    $('.swal-container').remove();
+                    setTimeout(function () {
+                        $('#sparkle-modal').modal();
+                    }, 50)
+
+                    const backdropClone = $('#backdrop-round').html();
+                    const svgClone = $('.particle-pen .svg-sign-in').html();
+
+                    setInterval(function () {
+                        $('#backdrop-round').html('').html(backdropClone);
+                        $('.particle-pen .svg-sign-in').html('').html(svgClone);
+                    }, 4000)
+
+                    localStorage.setItem('exclusiveOfferAppearedOnce', 'true');
+                }, 12000)
+            }
+        })
+    </script>
+    <script src="~/js/jquery.lettering.js"></script>
+    <script src="~/js/rocket.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script async src="~/js/gsap.min.js"></script>
+    <script async>
+        var newsletterSubscriptionUrl = '@Url.Action("NewsletterSubscription", "Home")';
+    </script>
+    <script async src="~/js/newsletter-subscription.js"></script>
+}

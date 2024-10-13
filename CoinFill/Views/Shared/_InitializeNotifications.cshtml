@@ -1,0 +1,13 @@
+﻿@using CoinFill.Helpers.Extensions
+
+@Html.PartialSectionScripts(
+    @<script src="~/microsoft/signalr/dist/browser/signalr.js"></script>)
+
+@Html.PartialSectionScripts(
+    @<script>
+        var url = '@await Url.GetNotificationsUrlBasedOnRole()';
+        var notificationHubUrl = '/@CoinFill.Notifications.NotificationHub.Url';
+    </script>)
+
+@Html.PartialSectionScripts(
+    @<script src="~/js/notifications.js"></script>)

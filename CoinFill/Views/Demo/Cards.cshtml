@@ -1,0 +1,397 @@
+﻿@model int
+@using CoinFill.Helpers.Extensions
+@{
+    ViewData.SetTitle("Cards");
+    ViewData.SetMetaDescription("Easily manage all your crypto cards on this page.");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section StyleSheets {
+    <style>
+        .hover-border-darker-primary:hover {
+            border: 2px dashed var(--dark-primary) !important;
+            color: var(--dark-primary) !important;
+        }
+
+        .hover-border-primary:hover {
+            border: 1px solid var(--primary);
+        }
+
+        .hover-border-primary.disabled:hover,
+        .hover-border-primary:disabled {
+            border: none;
+        }
+
+        #address:after,
+        #transaction-address:after {
+            content: 'Copy';
+            position: absolute;
+            right: 0;
+            margin-right: 2rem;
+            top: 30% !important;
+        }
+
+        #address.hover-border-primary:hover,
+        #transaction-address.hover-border-primary:hover {
+            border: 2px solid var(--primary);
+        }
+    </style>
+    <link rel="stylesheet" href="~/sweet-alert2/sweetalert2.min.css" />
+}
+
+@await Html.PartialAsync("~/Views/Shared/Widgets/_NavCard.cshtml",
+    new CoinFill.WidgetViewModels.NavCardWidgetViewModel(
+        "fal fa-credit-card",
+        "text-primary",
+        ViewData.GetTitle() + " - Demo",
+        ViewData.GetMetaDescription(),
+        "col-12"))
+
+<div class="row">
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/0.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-1">
+                        <img src="~/images/static/card-types-images/visa.png" width="50" height="30" alt="Crypto Visa card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 18300</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            4505 3917 2510 9933
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">04/27</span>
+                            <span class="font-weight-medium">273</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/1.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-0">
+                        <img src="~/images/static/card-types-images/mastercard.png" width="50" height="35" alt="Crypto Mastercard card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 9250</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            5457 4300 0062 5059
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">07/26</span>
+                            <span class="font-weight-medium">580</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+        <div class="text-center mb-3">
+            <div class="card card-span"
+                 style="background-image: url('/images/static/card-backgrounds/2.png'); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem; background-size: 100% 100% !important;">
+                <div class="card-body">
+                    <div class="d-flex pb-0">
+                        <img src="~/images/static/card-types-images/americanexpress.png" width="75" height="30" alt="Crypto American Express card" />
+                        <div class="justify-content-center ml-auto">
+                            <span class="badge badge-soft-success">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mt-3 mb-2 d-flex justify-content-between">
+                            <span class="text-black fs-2 font-weight-semi-bold">$ 12500</span>
+                            <span class="d-flex align-items-center">
+                                <button data-demo-account="true" class="btn btn-mini p-2 btn-success">
+                                    <span>&nbsp;$ Add funds&nbsp;</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="col-12 text-black text-left font-weight-medium">
+                            3751 212265 57305
+                        </div>
+                        <div class="col-12 text-black d-flex justify-content-between">
+                            <span data-toggle="tooltip"
+                                  data-placement="bottom"
+                                  data-html="true"
+                                  title="<i class='fas fa-user text-info mr-1'></i>Leonard Cooper"
+                                  class="font-weight-semi-bold">
+                                Leonard Cooper
+                            </span>
+                            <span class="font-weight-medium">02/26</span>
+                            <span class="font-weight-medium">648</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 text-center mb-3">
+        <button type="button"
+                data-toggle="modal"
+                data-target="#card-type-modal"
+                class="btn text-primary fs-1 hover-border-darker-primary"
+                style="border: 2px dashed var(--primary); width: 18rem; min-width: 16rem; height: 11rem; border-radius: 0.75rem !important;">
+            <span class="d-flex flex-center">
+                <i class="fal fa-plus-circle fa-2x mr-2"></i>Create crypto card
+            </span>
+        </button>
+    </div>
+</div>
+
+<div id="card-type-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Choose your prefered card type</h5>
+                <button id="card-type-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body px-4 pb-5 pt-sm-1 px-sm-5">
+                <div class="row">
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="cf-icon-virtual-card fa-3x text-primary"></i>
+                            Virtual crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $15000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">The card is available immediately after payment verification</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price: 49$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="virtual-card" data-demo-account="true" data-card-type="virtual" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your virtual crypto card</span>
+                        </button>
+                    </div>
+                    <div class="col-md-2 d-none d-lg-flex justify-content-center">
+                        <div class="border-dotted-left-4 d-none d-sm-block"></div>
+                    </div>
+                    <div class="col-12 col-lg-5 align-self-center text-center">
+                        <h4 class="d-flex flex-center text-primary no-tick mb-0" style="min-height: 7.5rem !important;">
+                            <i class="fal fa-credit-card fa-2x text-primary mr-2"></i>
+                            Physical crypto card
+                        </h4>
+                        <div class="row flex-center">
+                            <div class="col-7 col-sm-8 mx-auto">
+                                <div class="row flex-center text-left">
+                                    <div class="mx-auto">
+                                        <div class="pt-1">
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        All major card brands are supported:
+                                                        <span class="d-block">
+                                                            <img src="~/images/static/card-svgs/visa.svg" style="margin-right: 0.4rem; margin-top: 0.3rem;" />
+                                                            <img src="~/images/static/card-svgs/mastercard.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/amex.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/unionpay.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/discover.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/jcb.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                            <img src="~/images/static/card-svgs/elo.svg" style="margin-right: 0.4rem; margin-top: 0.3rem; " />
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Additional 20% in USD on your first deposit
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        4% USD cashback
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">No KYC for transactions less than $15000</h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Top up the card's balance by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        through your CoinFill account
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-3" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Shipping to
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-countries-modal">@Model supported countries</button>;
+                                                        arrives in 5-7 business days
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            <div class="media align-items-center pb-1 mb-4" style="min-height:2rem;">
+                                                <i class="fad fa-check-circle fa-lg fa-fw mr-2 no-tick" style="color:#00d27a"></i>
+                                                <div class="media-body">
+                                                    <h6 class="mb-0">
+                                                        Price + shipping: 149$ (Can be paid by a
+                                                        <button class="btn-link border-0 bg-transparent" data-toggle="modal" data-target="#cards-page-supported-cryptocurrencies-modal">supported cryptocurrency</button>
+                                                        of your choice)
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="physical-card" data-demo-account="true" data-card-type="physical" class="btn btn-primary mb-5 mb-sm-5 mb-md-2 mb-lg-0 rounded-pill">
+                            <span>Get your physical crypto card</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCryptocurrencies.cshtml")
+@await Html.PartialAsync("~/Views/Shared/_CardsPageSupportedCountries.cshtml")
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('main[role="main"]').removeClass('pb-3');
+        })
+    </script>
+    <script src="~/sweet-alert2/sweetalert2.all.min.js"></script>
+}

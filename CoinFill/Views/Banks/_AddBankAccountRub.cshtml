@@ -1,0 +1,359 @@
+﻿@model CoinFill.ViewModels.BankAccountTypes.AddBankAccountRub
+@using CoinFill.Helpers.Extensions
+
+<div id="rub-bank-modal"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">Enter your bank information</h5>
+                <button id="rub-bank-times" type="button" class="btn-close-rub-modal close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form id="rub-form" autocomplete="on">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-12 text-center mb-4">
+                            <i class="fas fa-university text-secondary fa-3x mr-n2"></i>
+                            <img src="~/images/static/bank-currencies/RUB.svg" width="24" height="24" alt="RUB" class="ml-n3 rounded-circle" />
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="RubAccountHolderFirstName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="RubAccountHolderFirstName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="RubAccountHolderFirstName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="RubAccountHolderLastName"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-user"></i></span>
+                                    </div>
+                                    <input asp-for="RubAccountHolderLastName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="RubAccountHolderLastName" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="w-100 position-relative mt-4">
+                                <hr class="text-300" />
+                                <div class="position-absolute absolute-centered t-0 px-3 bg-white text-sans-serif fs--1 text-500 text-nowrap">
+                                    RUB Bank Account Information
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="RubBicSwift"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="RubBicSwift" class="form-control" />
+                                </div>
+                                <span asp-validation-for="RubBicSwift" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label asp-for="RubIBAN"></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fal fa-university"></i></span>
+                                    </div>
+                                    <input asp-for="RubIBAN" class="form-control" />
+                                </div>
+                                <span asp-validation-for="RubIBAN" class="invalid-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-save-rub-bank" class="btn btn-primary btn-block m-0 mb-3">
+                    <span>Save bank account</span>
+                </button>
+                <button id="btn-cancel-rub-bank" class="btn-close-rub-modal btn btn-falcon-secondary btn-block m-0">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.PartialSectionScripts(
+    @<script>
+        $(document).ready(function () {
+            let rubFirstName = $('#RubAccountHolderFirstName');
+            let rubLastName = $('#RubAccountHolderLastName');
+            let rubBicSwift = $('#RubBicSwift');
+            let rubIban = $('#RubIBAN');
+
+            let btnSaveRub = $('#btn-save-rub-bank');
+            let btnSaveRubText = btnSaveRub.find('span');
+            let btnSaveRubTextUnchanged = btnSaveRubText.html();
+
+            const rubTimes = $('#rub-bank-times');
+            const rubCancel = $('#btn-cancel-rub-bank');
+
+            const rubForm = $('#rub-form');
+            const rubBankModal = $('#rub-bank-modal');
+
+            btnSaveRub.click(function () {
+                DisableRubInputs();
+
+                const width = $(this).width();
+                const height = $(this).height();
+                btnSaveRubText.fadeOut('fast', function () {
+                    $(this).html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                    btnSaveRub.width(width);
+                    btnSaveRub.height(height);
+                });
+
+                setTimeout(function () {
+                    if (RubFormIsValid()) {
+                        let formData = new FormData(rubForm.get(0));
+                        formData.append('rubAccount.RubAccountHolderFirstName', rubFirstName.val());
+                        formData.append('rubAccount.RubAccountHolderLastName', rubLastName.val());
+                        formData.append('rubAccount.RubAccountCurrency', 'RUB');
+                        formData.append('rubAccount.RubBicSwift', rubBicSwift.val());
+                        formData.append('rubAccount.RubIBAN', rubIban.val());
+
+                        $.ajax({
+                            url: '@Url.Action("AddRubBankAccount", "Banks", new { Area = "" })',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                            },
+                            success: function (response) {
+                                if (response.success === true) {
+                                    btnSaveRubText.fadeOut('fast', function () {
+                                        $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                            setTimeout(function () {
+                                                rubBankModal.modal('hide');
+                                                EnableRubInputs();
+                                                btnSaveRubText.html(btnSaveRubTextUnchanged);
+
+                                                let requiredRubBankInfo = '<div class="text-left">' +
+                                                    `BIC: ${response.bank.bicSwift}` +
+                                                    '</div>' +
+                                                    '<div class="text-left">' +
+                                                    `IBAN: ${response.bank.bankAccountNumber}` +
+                                                    '</div>' +
+                                                    `<button data-send-to-bank="${response.bank.id}" class="btn btn-soft-info btn-block mt-auto">` +
+                                                    '<span>&nbsp;Deposit cryptocurrencies&nbsp;</span>' +
+                                                    '</button>';
+
+                                                let newRubBankBody = '<div class="d-flex justify-content-center col-12 col-md-6 col-xl-4 text-center mb-3">' +
+                                                    '<div class="card card-span" style="width: 24rem; min-width: 22rem; height: 16rem; border-radius: 0.75rem !important;">' +
+                                                    '<div class="card-body d-flex flex-column">' +
+                                                    '<div class="card-img-top mb-3 d-flex justify-content-start">' +
+                                                    '<div class="d-flex flex-center text-center p-2 rounded-soft" style="width: 4.7rem !important; height: 4.6rem !important; background-color: #d8e2ef;">' +
+                                                    '<i class="fas fa-university fa-fw fa-3x align-middle mb-1" style="color: var(--secondary); margin-right: 0.35rem;"></i>' +
+                                                    `<span style="background-image: url('/images/static/bank-currencies/${response.bank.currency}.svg')" class="img-currency ml-n4 mt-4"></span>` +
+                                                    '</div>' +
+                                                    '<span class="ml-3 text-left">' +
+                                                    '<span class="font-weight-semi-bold text-black">' +
+                                                    `${response.bank.currency} Bank Account` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Bank ID: ${response.bank.id}` +
+                                                    '</span>' +
+                                                    '<br>' +
+                                                    '<span class="fs--1">' +
+                                                    `Deposit fee: ${response.bank.fee}%` +
+                                                    '</span>' +
+                                                    '</span>' +
+                                                    '<div class="ml-auto">' +
+                                                    '<span class="badge badge-soft-success">' +
+                                                    '<i class="fas fa-check-circle mr-1"></i>Active' +
+                                                    '</span>' +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '<div class="text-left text-black">' +
+                                                    `${response.bank.firstName} ${response.bank.lastName}` +
+                                                    '</div>' +
+                                                    requiredRubBankInfo +
+                                                    '</div>' +
+                                                    '</div>' +
+                                                    '</div>';
+
+                                                const addBankCol = $('#add-bank-col');
+                                                addBankCol.removeClass();
+                                                addBankCol.addClass('d-flex justify-content-center col-12 col-md-6 col-xl-4 mb-3');
+
+                                                $(newRubBankBody).insertBefore('#add-bank-col');
+
+                                                $(`button[data-send-to-bank="${response.bank.id}"]`).click(function () {
+                                                    FuncConfirmBankDeposit($(this));
+                                                })
+
+                                                Swal.fire({
+                                                    title: response.title,
+                                                    text: response.body,
+                                                    icon: response.severity,
+                                                    confirmButtonColor: '#00d27a',
+                                                    confirmButtonText: 'Alright'
+                                                });
+                                            }, 600)
+                                        })
+                                    })
+                                } else {
+                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                    else HandleRubBankError(response.title, response.body, response.severity);
+                                }
+                            },
+                            error: function () {
+                                HandleRubBankError('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                            }
+                        })
+                    } else HandleRubBankError('Fill all the required fields', '', 'info');
+                }, 1200)
+            })
+
+            function FuncConfirmBankDeposit(bankElement) {
+                let node = $(bankElement);
+                let bankElementText = node.find('span');
+                let bankElementTextUnchanged = bankElementText.html();
+                const bankId = node.attr('data-send-to-bank');
+
+                $('button[data-send-to-bank]').prop('disabled', true);
+
+                const width = node.width();
+                const height = node.height();
+                bankElementText.fadeOut('fast', function () {
+                    bankElementText.html('<div class="spinner mx-auto" style="border: 1px solid var(--primary); border-top-color: white;"></div>').fadeIn('slow');
+                    node.width(width);
+                    node.height(height);
+                });
+
+                setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetBankWithdrawCapturePage", "Banks", new { Area = "" })',
+                        type: 'POST',
+                        data: {
+                            bankId: bankId
+                        },
+                        dataType: 'json',
+                        headers: {
+                            'RequestVerificationToken': $("input[name='__RequestVerificationToken']").val()
+                        },
+                        success: function (response) {
+                            if (response.success === true) {
+                                $('html').append(response.partialView);
+                            } else {
+                                if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                else {
+                                    bankElementText.fadeOut('fast', function () {
+                                        bankElementText.html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                        toastr[response.severity](response.body, response.title);
+                                    })
+                                        .promise()
+                                        .done(function () {
+                                            setTimeout(function () {
+                                                bankElementText.fadeOut('fast', function () {
+                                                    $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                                    $('button[data-send-to-bank]').prop('disabled', false);
+                                                });
+                                            }, 1300)
+                                        })
+                                }
+                            }
+                        },
+                        error: function () {
+                            bankElementText.fadeOut('fast', function () {
+                                $(this).html('<i class="fas fa-times text-white no-tick"></i>').fadeIn('slow');
+                                toastr['error']('Please refresh the page and try again or contact the customer support.', 'An error occurred');
+                            })
+                                .promise()
+                                .done(function () {
+                                    setTimeout(function () {
+                                        bankElementText.fadeOut('fast', function () {
+                                            $(this).html(bankElementTextUnchanged).fadeIn('slow');
+                                            $('button[data-send-to-bank]').prop('disabled', false);
+                                        });
+                                    }, 1300)
+                                })
+                        }
+                    })
+                }, 1200)
+            }
+
+            $('.btn-close-rub-modal').click(function () {
+                rubBankModal.modal('hide');
+                $('#new-bank-currency-modal').modal('show');
+            })
+
+            function RubElementIsValid(element) {
+                return rubForm.validate().element($(element));
+            }
+
+            function RubFormIsValid() {
+                const firstNameValid = RubElementIsValid(rubFirstName);
+                const lastNameValid = RubElementIsValid(rubLastName);
+                const bicSwiftValid = RubElementIsValid(rubBicSwift);
+                const ibanValid = RubElementIsValid(rubIban);
+
+                return (firstNameValid && lastNameValid &&
+                    bicSwiftValid && ibanValid);
+            };
+
+            function EnableRubInputs() {
+                rubFirstName.prop('readonly', false);
+                rubLastName.prop('readonly', false);
+                rubBicSwift.prop('readonly', false);
+                rubIban.prop('readonly', false);
+
+                btnSaveRub.prop('disabled', false);
+                rubTimes.prop('disabled', false);
+                rubCancel.prop('disabled', false);
+            }
+
+            function DisableRubInputs() {
+                rubFirstName.prop('readonly', true);
+                rubLastName.prop('readonly', true);
+                rubBicSwift.prop('readonly', true);
+                rubIban.prop('readonly', true);
+
+                btnSaveRub.prop('disabled', true);
+                rubTimes.prop('disabled', true);
+                rubCancel.prop('disabled', true);
+            }
+
+            function HandleRubBankError(title, body, severity) {
+                btnSaveRubText.fadeOut('fast', function () {
+                    $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                    toastr[severity](body, title)
+                })
+                    .promise()
+                    .done(function () {
+                        setTimeout(function () {
+                            btnSaveRubText.fadeOut('fast', function () {
+                                $(this).html(btnSaveRubTextUnchanged).fadeIn('slow');
+                                EnableRubInputs();
+                            });
+                        }, 1300)
+                    })
+            }
+        })
+    </script>)

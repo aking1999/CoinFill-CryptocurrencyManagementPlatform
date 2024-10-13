@@ -1,0 +1,23 @@
+﻿@model List<CoinFill.Models.Cryptocurrencies>
+
+<div class="row">
+    @foreach (var crypto in Model)
+    {
+        <div class="col-4 col-md-3 col-lg-2">
+            <div class="media align-items-center pb-1 mb-3">
+                <div class="avatar avatar-2xl">
+                    <img class="rounded-circle img-thumbnail p-2 border-0 d-inline-block"
+                         src="~/images/static/cryptocurrencies/@crypto.Icon"
+                         loading="lazy"
+                         alt="@crypto.Name"
+                         style="min-width: 2.5rem !important;">
+                </div>
+                <div class="media-body">
+                    <h6 class="mb-0">
+                        @crypto.Name
+                    </h6>
+                </div>
+            </div>
+        </div>
+    }
+</div>

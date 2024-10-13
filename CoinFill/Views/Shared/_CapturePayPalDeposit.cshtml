@@ -1,0 +1,528 @@
+﻿@model CoinFill.PartialViewModels.CaptureTransaction
+@using CoinFill.Helpers
+
+<div id="transaction-modal-@Model.Id"
+     data-modal-id="@Model.Id"
+     data-toggle="modal"
+     class="modal fade p-0"
+     data-keyboard="false"
+     data-backdrop="static"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-center mx-auto">@Model.HeaderText</h5>
+                <button id="transaction-methods-times" type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fal fa-times fa-xs"></span>
+                </button>
+            </div>
+            <div class="modal-body pt-4 px-4 px-sm-5">
+                <form autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label for="Chosen_TransactionMethodId" class="mb-2">@Model.ChosenTransactionIdLabel</label>
+                        <select asp-for="Chosen_TransactionMethodId"
+                                data-dropup-auto="false"
+                                class="selectpicker form-control"
+                                data-live-search="true"
+                                title="@Model.DropdownPlaceholderText"
+                                data-size="4">
+                            @if (Model.ToChooseFrom_TransactionMethods != null && Model.ToChooseFrom_TransactionMethods.Any())
+                            {
+                                foreach (var paymentType in Model.ToChooseFrom_TransactionMethods)
+                                {
+                                    var concat = Helper.GetObjectIconAndNameAndColor(paymentType.Text);
+
+                                    <option value="@paymentType.Value" data-content="<div class='avatar avatar-m mr-2'><img class='rounded-circle border-0 d-inline-block' src='/images/static/cryptocurrencies/@concat[0]' alt='@concat[1]' /></div>@concat[1]">
+                                        @concat[1]
+                                    </option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>Transaction methods unavailable.</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Chosen_TransactionMethodId" class="invalid-feedback"></span>
+                    </div>
+                </form>
+                <div id="transaction-network-dropdown-holder" class="form-group" style="display: none;">
+                    <label for="transaction-network">Select the blockchain / network</label>
+                    <select id="transaction-network"
+                            data-dropup-auto="false"
+                            class="selectpicker form-control"
+                            data-live-search="true"
+                            title="Blockchain"
+                            data-size="4"></select>
+                    <span id="transaction-network-validation" class="invalid-feedback"></span>
+                </div>
+                <div id="qr-transaction-address-holder" class="form-group flex-center no-gutters" style="display: none;">
+                    <div id="transaction-notice" class="col-12 text-center mb-2"></div>
+                    <div id="qr-transaction-address" class="avatar avatar-4xl"></div>
+                    <div class="input-group mt-2">
+                        <textarea id="transaction-address" readonly="" type="text" class="hover-border-primary col-12 text-center form-control" value="" onclick="copyToClipboard()"></textarea>
+                        <div class="input-group-append">
+                            <button id="btn-copy" type="button" class="input-group-text btn" onclick="copyToClipboard()">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="transaction-alert-body" class="alert alert-success align-items-center mb-0" role="alert" style="display: none; color: var(--ca-green) !important;">
+                    <i class="fad fa-check-circle fa-lg mr-3"></i>
+                    <div id="transaction-alert-message" class="m-auto" style="display: none;">
+                        @Html.Raw(Model.AlertMessage)
+                    </div>
+                </div>
+            </div>
+            <div id="transaction-modal-footer" class="modal-footer pt-0 border-top-0 pb-4 px-4 pb-sm-5 px-sm-5">
+                <button id="btn-finish-transaction" class="btn btn-primary btn-block m-0 mb-3" style="display: none;">
+                    <span>Done</span>
+                </button>
+                <button id="btn-cancel-transaction" class="btn btn-falcon-secondary btn-block m-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script class="script-@Model.Id" src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<script class="script-@Model.Id" src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<script class="script-@Model.Id">
+    $(document).ready(function () {
+        let btnTransfer = $('#btn-transfer');
+        let btnTransferText = btnTransfer.find('span');
+        const btnTransferTextUnchanged = '<span>&nbsp;Request PayPal transfer&nbsp;</span>';
+
+        const id = '@Model.Id';
+        const isBank = (String('@Model.IsBank').toLowerCase() === 'true');
+        let transactionMethods = $('#Chosen_TransactionMethodId');
+        let cryptoTransactionNetworks = $('#transaction-network');
+        let cryptoTransactionNetworksDropdownHolder = $('#transaction-network-dropdown-holder');
+
+        const qrTransactionAddressHolder = $('#qr-transaction-address-holder');
+        const qrTransactionAddress = $('#qr-transaction-address');
+        const transactionNotice = $('#transaction-notice');
+        const transactionAddress = $('#transaction-address');
+        const btnCopy = $('#btn-copy');
+
+        const transactionAlertBody = $('#transaction-alert-body');
+        const transactionAlertMessage = $('#transaction-alert-message');
+
+        const btnFinishTransaction = $('#btn-finish-transaction');
+        const btnFinishTransactionText = btnFinishTransaction.find('span');
+        const btnFinishTransactionTextUnchaned = btnFinishTransactionText.html();
+
+        let transactionModal = $('#transaction-modal-' + id);
+        const csfrToken = $("input[name='__RequestVerificationToken']");
+
+        transactionModal.modal();
+
+        transactionMethods.selectpicker('refresh');
+        transactionMethods.change(function () {
+            cryptoTransactionNetworks.selectpicker('val', '');
+            cryptoTransactionNetworks.selectpicker('refresh');
+            cryptoTransactionNetworksDropdownHolder.css('display', 'none');
+            qrTransactionAddressHolder.removeClass('row').css('display', 'none');
+            transactionAlertBody.removeClass('d-flex').css('display', 'none');
+            $('#transaction-modal-footer').removeClass('pt-3').addClass('pt-0');
+            btnFinishTransaction.css('display', 'none');
+            $('#transaction-network option').remove();
+
+            $.ajax({
+                url: '@Url.Action("GetNetworks", "Dashboard", new { Area = "" })',
+                type: 'POST',
+                data: { coinId: transactionMethods.find(":selected").val() },
+                dataType: 'json',
+                headers: {
+                    'RequestVerificationToken': csfrToken.val()
+                },
+                success: function (response) {
+                    if (response.success === true) {
+                        $.each(response.networks, function (i, obj) {
+                            var ul = document.getElementById("transaction-network");
+                            var li = document.createElement("option");
+                            var linkText = document.createTextNode(obj.name);
+                            li.value = obj.id;
+                            li.appendChild(linkText);
+                            ul.appendChild(li);
+                        })
+
+                        cryptoTransactionNetworks.selectpicker('refresh');
+                        cryptoTransactionNetworksDropdownHolder.fadeIn('slow');
+
+                        cryptoTransactionNetworks.change(function () {
+                            qrTransactionAddressHolder.removeClass('row').css('display', 'none');
+                            transactionAlertBody.removeClass('d-flex').css('display', 'none');
+                            $('#transaction-modal-footer').removeClass('pt-3').addClass('pt-0');
+                            btnFinishTransaction.css('display', 'none');
+                            qrTransactionAddress.css(
+                                {
+                                    'background-image': `none`,
+                                    'background-size': 'none'
+                                }).addClass('avatar avatar-4xl').html('')
+
+                            $.ajax({
+                                url: '@Url.Action("GetUserQrCodeForTransaction", "Dashboard", new { Area = "" })',
+                                type: 'POST',
+                                data: {
+                                    coinId: transactionMethods.find(":selected").val(),
+                                    networkId: cryptoTransactionNetworks.find(":selected").val(),
+                                    isBank: isBank,
+                                    isPayPal: true
+                                },
+                                dataType: 'json',
+                                headers: {
+                                    'RequestVerificationToken': csfrToken.val()
+                                },
+                                success: function (response) {
+                                    if (response.success === true) {
+                                        if (response.generated === true) {
+                                            qrTransactionAddress.css(
+                                                {
+                                                    'background-image': `url('/generated/deposit/addresses/${response.qrCode}')`,
+                                                    'background-size': '100% 100%'
+                                                })
+
+                                            transactionNotice.html(response.notice);
+                                            transactionAddress.val(response.address);
+
+                                            transactionNotice.fadeIn(1);
+                                            transactionAddress.fadeIn(1);
+                                            btnCopy.fadeIn(1);
+
+                                            qrTransactionAddressHolder.fadeIn(1, function () {
+                                                $(this).addClass('row');
+                                            });
+
+                                            transactionAlertBody.fadeIn(1, function () {
+                                                $(this).addClass('d-flex');
+                                                transactionAlertMessage.fadeIn('slow');
+                                            });
+
+                                            $('#transaction-modal-footer').removeClass('pt-0').addClass('pt-3');
+                                            btnFinishTransaction.fadeIn('slow');
+                                        } else {
+                                            qrTransactionAddress
+                                                .removeClass('avatar avatar-4xl')
+                                                .html(
+                                                    `<div id="address-not-generated" class="mb-3 text-center">You have not generated the ${$('#Chosen_TransactionMethodId option:selected').text().trim()} (${$('#transaction-network option:selected').text().trim()}) address yet. Click the button below to generate a new ${$('#Chosen_TransactionMethodId option:selected').text().trim()} (${$('#transaction-network option:selected').text().trim()}) address.</div>` +
+                                                    '<span class="d-flex justify-content-center">' +
+                                                    '<button id="btn-generate-transaction" class="btn btn-primary btn-sm">' +
+                                                    '<span id="btn-generate-transaction-text">Generate new address</span>' +
+                                                    '</button>' +
+                                                    '</span>')
+
+                                            transactionNotice.fadeOut(1);
+                                            transactionAddress.fadeOut(1);
+                                            btnCopy.fadeOut(1);
+
+                                            qrTransactionAddressHolder.fadeIn('slow', function () {
+                                                $(this).addClass('row');
+
+                                                let btnGenerateTransaction = $('#btn-generate-transaction');
+                                                let btnGenerateTransactionText = btnGenerateTransaction.find('#btn-generate-transaction-text');
+                                                const btnGenerateTransactionTextUnchanged = btnGenerateTransactionText.html();
+
+                                                btnGenerateTransaction.click(function () {
+                                                    event.preventDefault();
+                                                    event.stopImmediatePropagation();
+                                                    btnGenerateTransaction.prop('disabled', true);
+                                                    DisableTransactionInputs();
+
+                                                    let width = btnGenerateTransaction.width();
+                                                    let height = btnGenerateTransaction.height();
+                                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                                        btnGenerateTransactionText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                                                        btnGenerateTransaction.height(height);
+                                                        btnGenerateTransaction.width(width);
+                                                    })
+
+                                                    setTimeout(function () {
+                                                        $.ajax({
+                                                            url: '@Url.Action("GenerateNetworkAddressForTransaction", "Dashboard", new { Area = "" })',
+                                                            type: 'POST',
+                                                            data: {
+                                                                coinId: transactionMethods.find(":selected").val(),
+                                                                networkId: cryptoTransactionNetworks.find(":selected").val(),
+                                                                isBank: isBank,
+                                                                isPayPal: true
+                                                            },
+                                                            dataType: 'json',
+                                                            headers: {
+                                                                'RequestVerificationToken': csfrToken.val()
+                                                            },
+                                                            success: function (response) {
+                                                                if (response.success === true) {
+                                                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                                                        $(this).html('<i class="ca-lightgreen fas fa-check not-tick"></i>').fadeIn('slow', function () {
+                                                                            setTimeout(function () {
+                                                                                toastr[response.severity](response.body, response.title);
+                                                                                qrTransactionAddress.fadeOut('fast', function () {
+                                                                                    $(this).html('');
+                                                                                    $(this).addClass('avatar avatar-4xl').css(
+                                                                                        {
+                                                                                            'background-image': `url('/generated/deposit/addresses/${response.qrCode}')`,
+                                                                                            'background-size': '100% 100%'
+                                                                                        });
+                                                                                    qrTransactionAddressHolder.fadeIn('slow', function () {
+                                                                                        $(this).addClass('row');
+                                                                                        qrTransactionAddress.fadeIn('slow');
+                                                                                    })
+
+                                                                                    transactionNotice.html(response.notice);
+                                                                                    transactionAddress.val(response.address);
+
+                                                                                    transactionNotice.fadeIn('slow');
+                                                                                    transactionAddress.fadeIn('slow');
+                                                                                    btnCopy.fadeIn('slow');
+                                                                                    transactionAlertBody.fadeIn(1, function () {
+                                                                                        $(this).addClass('d-flex');
+                                                                                        transactionAlertMessage.fadeIn('slow');
+                                                                                    });
+                                                                                    btnFinishTransaction.fadeIn('slow');
+                                                                                    EnableTransactionInputs();
+                                                                                })
+                                                                            }, 600)
+                                                                        });
+                                                                    });
+                                                                } else {
+                                                                    if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                                                    else {
+                                                                        btnGenerateTransactionText.fadeOut('fast', function () {
+                                                                            $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+                                                                            HandleTransactionErrorShowSwal(response.title, response.body, response.severity);
+                                                                        })
+                                                                            .promise()
+                                                                            .done(function () {
+                                                                                setTimeout(function () {
+                                                                                    btnGenerateTransactionText.fadeOut('fast', function () {
+                                                                                        $(this).html(btnGenerateTransactionTextUnchanged).fadeIn('slow');
+                                                                                        EnableTransactionInputs();
+                                                                                    });
+                                                                                }, 1300)
+                                                                            })
+                                                                    }
+                                                                }
+                                                            },
+                                                            error: function () {
+                                                                HandleTransactionErrorShowSwal('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                                                            }
+                                                        })
+                                                    }, 1200)
+                                                })
+                                            })
+                                        }
+                                    } else {
+                                        if (response.redirectUrl) window.location.href = response.redirectUrl;
+                                        else HandleTransactionErrorShowSwal(response.title, response.body, response.severity);
+                                    }
+                                },
+                                error: function () {
+                                    HandleTransactionErrorShowSwal('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                                }
+                            });
+                        });
+                    } else {
+                        if (response.redirectUrl) window.location.href = response.redirectUrl;
+                        else if (response.networks && response.networks.length === 0) {
+                            $('#transaction-network option').remove();
+                            var ul = document.getElementById("transaction-network");
+                            var li = document.createElement("option");
+                            var linkText = document.createTextNode(`${$('#Chosen_TransactionMethodId option:selected').text().trim()} blockchain unavailable.`);
+                            li.disabled = true;
+                            li.appendChild(linkText);
+                            ul.appendChild(li);
+
+                            cryptoTransactionNetworks.selectpicker('refresh');
+                            cryptoTransactionNetworksDropdownHolder.fadeIn('slow');
+                        }
+                        else HandleTransactionErrorShowSwal(response.title, response.body, response.severity);
+                    }
+                },
+                error: function () {
+                    HandleTransactionErrorShowSwal('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                }
+            });
+        });
+
+        btnFinishTransaction.click(function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            DisableTransactionInputs();
+
+            let width = btnFinishTransaction.width();
+            let height = btnFinishTransaction.height();
+            btnFinishTransactionText.fadeOut('fast', function () {
+                btnFinishTransactionText.html('<div class="spinner mx-auto"></div>').fadeIn('slow');
+                btnFinishTransaction.height(height);
+                btnFinishTransaction.width(width);
+            });
+
+            setTimeout(function () {
+                $.ajax({
+                    url: '@Url.Action("PayPalDeposit", "PayPal", new { Area = "" })',
+                    type: 'POST',
+                    data: {
+                        paypalRequestId: id,
+                        coinId: transactionMethods.find(":selected").val(),
+                        networkId: cryptoTransactionNetworks.find(":selected").val(),
+                        email: $('#PayPalRecipientEmail').val()
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'RequestVerificationToken': csfrToken.val()
+                    },
+                    success: function (response) {
+                        if (response.success === true) {
+                            btnFinishTransactionText.fadeOut('fast', function () {
+                                $(this).html('<i class="ca-lightgreen fas fa-check no-tick"></i>').fadeIn('slow', function () {
+                                    setTimeout(function () {
+                                        RefreshTransactionInputs();
+                                        EnableTransactionInputs();
+                                        DeleteTransactionModalAndScripts(id);
+
+                                        Swal.fire({
+                                            title: response.title,
+                                            text: response.body,
+                                            icon: response.severity,
+                                            confirmButtonColor: "#00d27a",
+                                            confirmButtonText: "Alright"
+                                        }).then(() => {
+                                            window.location.href = '@Url.Action("Index", "Home", new { Area = "" })'
+                                        })
+                                    }, 600)
+                                })
+                            })
+
+                            btnTransferText.fadeOut('fast', function () {
+                                $(this).html(btnTransferTextUnchanged).fadeIn('slow')
+                                $('#btn-transfer').prop('disabled', false);
+                                $('#PayPalRecipientEmail').prop('readonly', false);
+                            })
+                        } else {
+                            if (response.redirectUrl) window.location.href = response.redirectUrl;
+                            else {
+                                btnFinishTransactionText.fadeOut('fast', function () {
+                                    $(this).html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                                    HandleTransactionErrorShowSwal(response.title, response.body, response.severity);
+                                })
+                                    .promise()
+                                    .done(function () {
+                                        setTimeout(function () {
+                                            btnFinishTransactionText.fadeOut('fast', function () {
+                                                $(this).html(btnFinishTransactionTextUnchaned).fadeIn('slow');
+                                            });
+                                        }, 1300)
+                                    })
+                            }
+                        }
+                    },
+                    error: function () {
+                        btnFinishTransactionText.fadeOut('fast', function () {
+                            btnFinishTransactionText.html('<i class="text-white fas fa-times no-tick"></i>').fadeIn('slow');
+                            HandleTransactionErrorShowSwal('An error occurred', 'Please refresh the page and try again or contact the customer support.', 'error');
+                        })
+                            .promise()
+                            .done(function () {
+                                setTimeout(function () {
+                                    btnFinishTransactionText.fadeOut('fast', function () {
+                                        $(this).html(btnFinishTransactionTextUnchaned).fadeIn('slow');
+                                    });
+                                }, 1300)
+                            })
+                    }
+                })
+            }, 1200)
+        })
+
+        $('#btn-cancel-transaction').click(function () {
+            transactionModal.modal('hide');
+
+            btnTransferText.fadeOut('fast', function () {
+                $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+            })
+                .promise()
+                .done(function () {
+                    setTimeout(function () {
+                        btnTransferText.fadeOut('fast', function () {
+                            $(this).html(btnTransferTextUnchanged).fadeIn('slow');
+                            EnableTransactionInputs();
+                            btnTransfer.prop('disabled', false);
+                        })
+                    }, 1300)
+                })
+            RefreshTransactionInputs();
+            DeleteTransactionModalAndScripts(id);
+        })
+
+        $('#transaction-methods-times').click(function () {
+            btnTransferText.fadeOut('fast', function () {
+                $(this).html('<i class="text-danger fas fa-times no-tick"></i>').fadeIn('slow');
+            })
+                .promise()
+                .done(function () {
+                    setTimeout(function () {
+                        btnTransferText.fadeOut('fast', function () {
+                            $(this).html(btnTransferTextUnchanged).fadeIn('slow');
+                            EnableTransactionInputs();
+                            btnTransfer.prop('disabled', false);
+                        })
+                    }, 1300)
+                })
+            RefreshTransactionInputs();
+            DeleteTransactionModalAndScripts(id);
+        })
+
+        function RefreshTransactionInputs() {
+            $('.selectpicker').selectpicker('val', '');
+            $('.selectpicker').selectpicker('refresh');
+            cryptoTransactionNetworksDropdownHolder.css('display', 'none');
+            qrTransactionAddressHolder.removeClass('row').css('display', 'none');
+            transactionAlertBody.removeClass('d-flex').css('display', 'none');
+            $('#transaction-modal-footer').removeClass('pt-3').addClass('pt-0');
+            btnFinishTransaction.css('display', 'none');
+            $('#transaction-network option').remove();
+        }
+
+        function DeleteTransactionModalAndScripts(id) {
+            $('#transaction-modal-' + id).modal('hide');
+            setTimeout(function () {
+                $('#transaction-modal-' + id).remove();
+                $('.script-' + id).remove();
+            }, 1000)
+        }
+
+        function EnableTransactionInputs() {
+            $('#btn-transfer').prop('disabled', false);
+            $('#PayPalRecipientEmail').prop('readonly', false);
+
+            btnFinishTransaction.prop('disabled', false);
+            $('#btn-cancel-transaction').prop('disabled', false);
+            $('#transaction-methods-times').prop('disabled', false);
+        }
+
+        function DisableTransactionInputs() {
+            $('#btn-transfer').prop('disabled', true);
+            $('#PayPalRecipientEmail').prop('readonly', true);
+
+            btnFinishTransaction.prop('disabled', true);
+            $('#btn-cancel-transaction').prop('disabled', true);
+            $('#transaction-methods-times').prop('disabled', true);
+        }
+
+        function HandleTransactionErrorShowSwal(title, body, severity) {
+            EnableTransactionInputs();
+            Swal.fire({
+                icon: severity,
+                title: title,
+                text: body,
+                footer: `<a href="${'@Url.Action("CustomerSupport", "Home", new { Area = "" })'}">Contact the customer support.</a>`
+            });
+        }
+    });
+</script>
+<script class="script-@Model.Id" src="~/js/clipboard.js"></script>
